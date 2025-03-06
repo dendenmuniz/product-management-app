@@ -1,145 +1,154 @@
-import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { authMiddleware } from '../middlewares/authMiddleware';
+import { Router, Request, Response, NextFunction } from "express";
+import { PrismaClient } from "@prisma/client";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { productSchema } from "../schemas/productSchema";
+import { createError } from "../middlewares/errorHandler";
 
 const router = Router();
 const prisma = new PrismaClient();
 
-
-router.post('/', authMiddleware, async (req: Request, res: Response) => {
+router.post(
+  "/",
+  authMiddleware,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { role, id } = req.user!;
+      const { role, id } = req.user!;
 
-        if (role !== 'seller') {
-            res.status(403).json({ message: 'Unauthorized - Only sellers can create products' });
-            return;
-        }
-        const { name, description, price, stock } = req.body;
+      if (role !== "seller") {
+        return next(
+          createError("Unauthorized - Only sellers can create products", 403)
+        );
+      }
 
-        if (!name || !price || !stock) {
-            res.status(400).json({ message: 'Missing required information' });
-            return;
-        }
+      const result = productSchema.safeParse(req.body);
 
-        const product = await prisma.product.create({
-            data: {
-                name,
-                description,
-                price,
-                stock,
-                userId: id,
-            },
-        });
-        res.status(201).json(product);
+      if (!result.success) {
+        return next(createError("Invalid data", 400, result.error.flatten()));
+      }
+
+      const product = await prisma.product.create({
+        data: {
+          ...result.data,
+          userId: id,
+        },
+      });
+
+      res.status(201).json(product);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-        return;
+      console.error(error);
+      return next(createError("Internal server error", 500));
     }
-}
+  }
 );
 
-router.get('/', async (req: Request, res: Response) => {
+router.get(
+  "/",
+  authMiddleware,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const products = await prisma.product.findMany();
-        res.status(200).json(products);
-        return;
-
+      const products = await prisma.product.findMany();
+      res.status(200).json(products);
+      return;
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-        return;
+      console.error(error);
+      return next(createError("Error retrieving products", 500));
     }
-});
-
-router.get("/:id", authMiddleware, async (req: Request, res: Response) => {
-
-    try {
-        const { id: userId, role } = req.user!;
-        const { id } = req.params;
-
-
-        if (!id.match(/^[0-9a-fA-F-]{36}$/)) {
-            res.status(400).json({ message: "ID inválido" });
-            return
-        }
-
-        const product = await prisma.product.findUnique({ where: { id } });
-        if (!product) {
-            res.status(404).json({ message: 'Product not found' });
-            return;
-        }
-
-        res.json(product);
-        return;
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error updating product' });
-        return;
-    }
-}
+  }
 );
 
-router.put("/:id", authMiddleware, async (req: Request, res: Response) => {
-
+router.get(
+  "/:id",
+  authMiddleware,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id: userId, role } = req.user!;
-        const { id } = req.params;
+      const { id: userId, role } = req.user!;
+      const { id } = req.params;
 
+      if (!id.match(/^[0-9a-fA-F-]{36}$/)) {
+        return next(createError("Invalid product ID", 400));
+      }
 
-        const product = await prisma.product.findUnique({ where: { id } });
-        if (!product) {
-            res.status(404).json({ message: 'Product not found' });
-            return;
+      const product = await prisma.product.findUnique({ where: { id } });
+      if (!product) {
+        return next(createError("Product not found", 404));
+      }
 
-        }
-
-        if (product.userId !== userId && role !== 'admin') {
-            res.status(403).json({ message: 'Unauthorized - You can only update your own products' });
-            return;
-        }
-
-        const { name, description, price, stock } = req.body;
-
-        const updatedProduct = await prisma.product.update({
-            where: { id },
-            data: { name, description, price, stock },
-        });
-        res.json(updatedProduct);
-        return;
+      res.status(200).json(product);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error updating product' });
-        return;
+      console.error(error);
+      return next(createError("Error retrieving product", 500));
     }
-}
+  }
 );
 
-router.delete("/:id", authMiddleware, async (req: Request, res: Response) => {
+router.put(
+  "/:id",
+  authMiddleware,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id: userId, role } = req.user!;
-        const { id } = req.params;
+      const { id: userId, role } = req.user!;
+      const { id } = req.params;
 
-        const product = await prisma.product.findUnique({ where: { id } });
-        if (!product) {
-            res.status(404).json({ message: 'Product not found' });
-            return;
-        }
+      const product = await prisma.product.findUnique({ where: { id } });
+      if (!product) {
+        return next(createError("Product not found", 404));
+      }
 
-        if (product.userId !== userId && role !== 'admin') {
-            res.status(403).json({ message: 'Unauthorized - You can only delete your own products' });
-            return;
-        }
+      if (product.userId !== userId && role !== "admin") {
+        return next(
+          createError(
+            "Unauthorized - You can only update your own products",
+            403
+          )
+        );
+      }
 
-        await prisma.product.delete({ where: { id } });
-        res.json({ message: 'Product deleted' });
-        return;
+      const result = productSchema.partial().safeParse(req.body);
+      if (!result.success) {
+        return next(createError("Invalid data", 400, result.error.flatten()));
+      }
+
+      const updatedProduct = await prisma.product.update({
+        where: { id },
+        data: { ...result.data },
+      });
+      res.status(200).json(updatedProduct);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error deleting product' });
-        return;
+      console.error(error);
+      return next(createError("Error updating product", 500));
     }
-}
+  }
+);
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id: userId, role } = req.user!;
+      const { id } = req.params;
+
+      const product = await prisma.product.findUnique({ where: { id } });
+      if (!product) {
+        return next(createError("Product not found", 404));
+      }
+
+      if (product.userId !== userId && role !== "admin") {
+        return next(
+          createError(
+            "Unauthorized - You can only delete your own products",
+            403
+          )
+        );
+      }
+
+      await prisma.product.delete({ where: { id } });
+      res.status(200).json({ message: "Product deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      return next(createError("Error deleting product", 500));
+    }
+  }
 );
 
 export default router;
