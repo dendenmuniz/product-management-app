@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
-import { userSchema } from "../schemas/userShcema";
+import { userSchema } from "../schemas/userSchema";
 import { createError } from "../middlewares/errorHandler";
 
 const router = Router();
@@ -50,7 +50,7 @@ router.post(
       res.status(201).json({ token });
       return;
     } catch (error) {
-      console.error(error);
+        console.error(error);
       return next(createError("Internal server error", 500));
     }
   }
