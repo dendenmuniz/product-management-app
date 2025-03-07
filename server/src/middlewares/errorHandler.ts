@@ -17,8 +17,15 @@ export const errorHandler = (
   const message = err.message || "Internal server error";
   const details = err.details || undefined;
 
-  res.status(statusCode).json({ message, details  });
-  return;
+  if (
+    details?._errors &&
+    Array.isArray(details._errors) &&
+    details._errors.length === 0
+  ) {
+    delete details._errors; // remove empty _errors array
+  }
+
+  res.status(statusCode).json({ message, details });
 };
 
 export const createError = (
