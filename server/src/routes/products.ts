@@ -143,7 +143,7 @@ router.delete(
       }
 
       await prisma.product.delete({ where: { id } });
-      res.status(200).json("Product deleted successfully");
+      res.status(200).json({ message: "Product deleted successfully" });
     } catch (error) {
       console.error(error);
       return next(createError("Error deleting product", 500));
