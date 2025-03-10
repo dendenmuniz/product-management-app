@@ -20,7 +20,7 @@ declare module 'express' {
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !authHeader.startsWith('Bearer')) {
         return next(createError('Unauthorized - Missing or malformed token', 401));
     }
 
