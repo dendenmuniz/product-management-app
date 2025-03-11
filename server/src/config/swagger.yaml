@@ -1,0 +1,531 @@
+openapi: 3.0.0
+info:
+  title: Product Management API
+  version: 1.0.0
+  description: API for managing products
+servers:
+  - url: "{{API_BASE_URL}}"
+    description: Local development server
+paths:
+  /auth/register:
+    post:
+      summary: Create a new user
+      description: Registers a new user in the system.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+                - role
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: password123
+                name:
+                  type: string
+                  example: John Doe
+                role:
+                  type: string
+                  enum:
+                    - seller
+                    - admin
+                    - client
+      responses:
+        "201":
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              examples:
+                invalidData:
+                  summary: Prisma validation error
+                  value:
+                    message: "Validation failed"
+                    errors:
+                      - field: "name"
+                        message: "Name must have at least 3 characters"
+                      - field: "email"
+                        message: "Invalid email format"
+                      - field: "password"
+                        message: "Password must have at least 8 characters"
+                  userExists:
+                    summary: User already exists
+                    value:
+                      message: "User already exists"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/login:
+    post:
+      summary: Authenticate a user
+      description: Logs in a user and returns a JWT token.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        "200":
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI...
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid credentials
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /products:
+    post:
+      summary: Create a new product
+      description: Adds a new product to the system.
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+             schema:
+              type: object
+              required:
+                - name
+                - price
+                - stock
+              properties:
+                name:
+                  type: string
+                  example: "Logitech Wireless Mouse"
+                description:
+                  type: string
+                  example: "A high-precision wireless mouse"
+                price:
+                  type: number
+                  example: 49.99
+                stock:
+                  type: integer
+                  example: 10
+      responses:
+        "201":
+          description: Product successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              examples:
+                invalidData:
+                  summary: Prisma validation error
+                  value:
+                    message: "Validation failed"
+                    errors:
+                      - field: "name"
+                        message: "Name must have at least 3 characters"
+                      - field: "price"
+                        message: "Price must be greater than zero"
+                      - field: "stock"
+                        message: "Stock cannot be negative"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: User is not allowed to create a product
+                  value:
+                    message: "Unauthorized - Only sellers can create products"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                 schema:
+              $ref: "#/components/schemas/ValidationError"
+    get:
+      summary: Get all products
+      description: Retrieves a list of all registered products.
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Successfully retrieved product list
+          content:
+            application/json:
+              schema:
+                type: array
+                $ref: "#/components/schemas/Product"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /products/{id}:
+    get:
+      summary: Get a product by id
+      description: Retrieves a single product.
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of product to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successfully retrieved product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              examples:
+                invalidData:
+                  summary: Invalid product ID
+                  value:
+                    message: "Invalid product ID"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              examples:
+                notFound:
+                  summary: Product not found
+                  value:
+                    message: "Product not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      summary: Updates a product with form data
+      description: ""
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of product to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - price
+                - stock
+              properties:
+                name:
+                  type: string
+                  example: Logitech Wireless Mouse
+                price:
+                  type: number
+                  example: 49.99
+                stock:
+                  type: number
+                  example: 10
+      responses:
+        "200":
+          description: Successfully updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: User is not allowed to create a product
+                  value:
+                    message: "Unauthorized - Only sellers can create products"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              examples:
+                notFound:
+                  summary: Product not found with the provided id
+                  value:
+                    message: Product not found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Deletes a product
+      description: delete a product
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of product
+          required: true
+      responses:
+        "200":
+          description: Successfully deleted product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product deleted successfully
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+               examples:
+                unauthorized:
+                  summary: User is not allowed to create a product
+                  value:
+                    message: "Unauthorized - Only sellers can create products"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              examples:
+                notFound:
+                  summary: Product not found with the provided id
+                  value:
+                    message: Product not found
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - role
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          minLength: 3
+          example: "John Doe"
+          description: "Name must have at least 3 characters"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+          description: "Must be a valid email format"
+        password:
+          type: string
+          minLength: 8
+          example: "securepassword123"
+          description: "Password must be at least 8 characters long"
+        role:
+          type: string
+          enum:
+            - seller
+            - admin
+            - client
+          example: "admin"
+          description: "Role must be 'seller', 'admin', or 'client'"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2021-09-01T00:00:00.000Z"
+          description: "Timestamp of when the user was created (auto-generated)"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-09-02T14:30:00.000Z"
+          description: "Timestamp of last update (auto-generated)"
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Validation failed"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: "email"
+              message:
+                type: string
+                example: "Invalid email format"
+
+    Product:
+      type: object
+      required:
+        - name
+        - price
+        - stock
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "2d8f9077-e86e-4a44-a310-726b33c0d2a9"
+        name:
+          type: string
+          minLength: 3
+          example: "Logitech Wireless Mouse"
+          description: "Name must have at least 3 characters"
+        description:
+          type: string
+          example: "A high-precision wireless mouse"
+          description: "Optional product description"
+        price:
+          type: number
+          minimum: 0.01
+          example: 49.99
+          description: "Price must be greater than zero"
+        stock:
+          type: integer
+          minimum: 0
+          example: 10
+          description: "Stock cannot be negative"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2021-09-01T00:00:00.000Z"
+          description: "Timestamp of when the product was created (auto-generated)"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-09-02T14:30:00.000Z"
+          description: "Timestamp of last update (auto-generated)"
+        userId:
+          type: string
+          format: uuid
+          example: "be4d9b15-4b68-4efe-adbf-aa14642ebe49"
+          description: "ID of the user who created the product (auto-generated)"
+      ValidationError:
+        type: object
+        properties:
+          message:
+            type: string
+            example: "Validation failed"
+          errors:
+            type: array
+            items:
+              type: object
+              properties:
+                field:
+                  type: string
+                  example: "price"
+                message:
+                  type: string
+                  example: "Price must be greater than zero"
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Internal server error"
+
+security:
+  - BearerAuth: []

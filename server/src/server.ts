@@ -1,4 +1,5 @@
 import express from "express";
+import { setupSwagger } from "./config/swagger"
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
@@ -11,6 +12,7 @@ import productsRoutes from "./routes/products";
 dotenv.config();
 
 const app = express();
+setupSwagger(app);
 
 app.use(cors());
 app.use(helmet());
