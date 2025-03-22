@@ -59,7 +59,8 @@ export const ItemDescription = ({ description }: { description: string }) => {
       </div>
       <button
         className="text-violet-400 mb-5 hover:text-violet-700"
-        onClick={() => setShowFullDescription((prevState) => !prevState)}>
+        onClick={() => setShowFullDescription((prevState) => !prevState)}
+      >
         {showFullDescription ? "Less" : "More"}
       </button>
     </div>

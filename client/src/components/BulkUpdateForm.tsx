@@ -28,8 +28,8 @@ export const BulkUpdateForm = ({
       dropdownMsc === "false"
         ? { MSC: false }
         : dropdownMsc === ""
-        ? {}
-        : { MSC: true };
+          ? {}
+          : { MSC: true };
     const priceUpdate: Partial<Pick<Product, "price">> = price ? { price } : {};
 
     onSubmit({ ...msc, ...priceUpdate });
@@ -51,7 +51,8 @@ export const BulkUpdateForm = ({
               name="msc"
               className="border rounded w-full py-2 px-3"
               value={dropdownMsc}
-              onChange={(e) => setDropdownMsc(e.target.value)}>
+              onChange={(e) => setDropdownMsc(e.target.value)}
+            >
               <option value=""></option>
               <option value="false">No</option>
               <option value="true">Yes</option>
@@ -79,7 +80,8 @@ export const BulkUpdateForm = ({
               } inline-block bg-violet-500 hover:bg-violet-600 text-white rounded-lg px-4 py-2`}
               type="button"
               disabled={!allowUpdate}
-              onClick={handleSubmit}>
+              onClick={handleSubmit}
+            >
               Update Products
             </button>
           </div>

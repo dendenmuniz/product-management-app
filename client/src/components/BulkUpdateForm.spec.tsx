@@ -109,8 +109,7 @@ describe("BulkUpdateForm", () => {
     const updateButton = screen.getByText("Update Products");
 
     const mscDropdown = screen.getByLabelText("MSC");
-        fireEvent.change(mscDropdown, { target: { value: "" } });
-    
+    fireEvent.change(mscDropdown, { target: { value: "" } });
 
     fireEvent.change(screen.getByLabelText("Price"), {
       target: { value: "100" },

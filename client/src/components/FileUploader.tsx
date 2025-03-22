@@ -61,10 +61,11 @@ export const FileUploader = () => {
   };
 
   return (
-    <div className="bg-white px-3 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
+    <div className="px-3 py-8 mb-4 m-4 md:m-0">
       <form
         className="block space-y-6 flex size-full md:size-auto "
-        onSubmit={handleSubmit}>
+        onSubmit={handleSubmit}
+      >
         <div className="flex-initial w-96">
           <label className="inline-block text-gray-900 space-y-2">
             <span className="font-semibold">Upload your supplies</span>
@@ -85,7 +86,8 @@ export const FileUploader = () => {
         <div className="flex w-96 justify-end">
           <button
             className="inline-block bg-violet-500 hover:bg-violet-600 text-white rounded-lg px-4 py-2"
-            type="submit">
+            type="submit"
+          >
             Upload
           </button>
         </div>

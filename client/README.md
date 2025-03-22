@@ -1,90 +1,87 @@
-Footway+ Product Management System
-==================================
+# Footway+ Product Management System
 
 A frontend application for managing product catalogs across multiple sales channels. This React + TypeScript app provides merchants with tools to efficiently handle large product datasets, enabling seamless product browsing and management.
 
-🚀 Features
------------
+## 🚀 Features
 
--   Upload product inventory via JSON files.
--   View products in a searchable, filterable data grid.
--   Enable/disable products for Multi-Sales Channels (MSC) individually or in bulk.
--   Set wholesale prices individually or in bulk.
--   View detailed product information, including images.
+- Upload product inventory via JSON files.
+- View products in a searchable, filterable data grid.
+- Enable/disable products for Multi-Sales Channels (MSC) individually or in bulk.
+- Set wholesale prices individually or in bulk.
+- View detailed product information, including images.
 
-* * * * *
+---
 
-📂 Project Structure
---------------------
+## 📂 Project Structure
+
 src/
 
-├── components/                       # Reusable React components
+├── components/ # Reusable React components
 
-│   ├── Table.tsx                     # Table displaying product data
+│ ├── Table.tsx # Table displaying product data
 
-│   ├── Table.spec.tsx                # Tests
+│ ├── Table.spec.tsx # Tests
 
-│   ├── BulkUpdateForm.tsx            # Form to update multiple products 
+│ ├── BulkUpdateForm.tsx # Form to update multiple products
 
-│   ├── BulkUpdateForm.spec.tsx       # Tests
+│ ├── BulkUpdateForm.spec.tsx # Tests
 
-│   └── FileUploader.tsx              # Form to upload inventory JSON
+│ └── FileUploader.tsx # Form to upload inventory JSON
 
-│   └── FileUploader.spec.tsx         # Tests
+│ └── FileUploader.spec.tsx # Tests
 
-│   └── ItemImage.tsx                 # Image component to show product image on detail page
+│ └── ItemImage.tsx # Image component to show product image on detail page
 
-│   └── ItemAttribute.tsx             # Component to show product's attributes on detail page
+│ └── ItemAttribute.tsx # Component to show product's attributes on detail page
 
-│   └── ItemDescription.tsx           # Component to show product's description on detail page
+│ └── ItemDescription.tsx # Component to show product's description on detail page
 
-│   └── ItemHeader.tsx                # Component to identify product's on detail page
+│ └── ItemHeader.tsx # Component to identify product's on detail page
 
-│   └── InderteminateCheckBox.tsx     # Axiliar component for allow update
+│ └── InderteminateCheckBox.tsx # Axiliar component for allow update
 
-│   └── Header.tsx                    # Auxiliar component for pages
+│ └── Header.tsx # Auxiliar component for pages
 
-│   └── Card.tsx                      # Auxiliar component for pages
+│ └── Card.tsx # Auxiliar component for pages
 
-│   └── NavBar.tsx                    # Auxiliar component 
+│ └── NavBar.tsx # Auxiliar component
 
-├── pages/                            # Main pages of the application
+├── pages/ # Main pages of the application
 
-│   └── ProductsPage.tsx              # Main page for product management
+│ └── ProductsPage.tsx # Main page for product management
 
-│   └── ProductPage.tsx               # Page to show product's details
+│ └── ProductPage.tsx # Page to show product's details
 
-│   └── HomePage.tsx                  # Main page 
+│ └── HomePage.tsx # Main page
 
-├── layouts/                          # Main pages of the application
+├── layouts/ # Main pages of the application
 
-│   └── MainLayout.tsx                # App's main layout 
+│ └── MainLayout.tsx # App's main layout
 
-├── hooks/                            # Management of states and connection with API
+├── hooks/ # Management of states and connection with API
 
-│   └── requests.ts                   # Management of backend communication
+│ └── requests.ts # Management of backend communication
 
-│   └── useProducts.ts                # Management of states
+│ └── useProducts.ts # Management of states
 
-├── constext/                         # Context 
+├── constext/ # Context
 
-│   └── ProductsContext.tsx           # Context provider of the application
+│ └── ProductsContext.tsx # Context provider of the application
 
-server/                               # Express server for mock API
+server/ # Express server for mock API
 
-│   └── server.js                 
+│ └── server.js
 
-└── App.tsx                           # Root component`
+└── App.tsx # Root component`
 
-* * * * *
+---
 
-🛠️ Installation & Setup
-------------------------
+## 🛠️ Installation & Setup
 
 1.  **Clone the repository**
 
     `git clone https://github.com/dendenmuniz/footway-dashboard.git
-    cd footway-dashboard`
+cd footway-dashboard`
 
 2.  **Install dependencies**
 
@@ -100,7 +97,7 @@ server/                               # Express server for mock API
 
     The client runs on <http://localhost:3000>. The mock API runs on <http://localhost:8000>.
 
-* * * * *
+---
 
 🧪 Testing
 This project includes unit and integration tests using Jest and React Testing Library.
@@ -108,23 +105,21 @@ This project includes unit and integration tests using Jest and React Testing Li
 Run Tests
 `npm run test`
 
-* * * * *
+---
 
-📄 Usage
---------
+## 📄 Usage
 
 1.  Navigate to the **Products** page.
 2.  Use the **File Upload Form** to upload a product inventory JSON file.
 3.  View products in the **Product Table**:
-    -   Search for products using the search bar.
-    -   Filter products by attributes (e.g., vendor, department, type).
+    - Search for products using the search bar.
+    - Filter products by attributes (e.g., vendor, department, type).
 4.  Bulk update or enable/disable products using the **Bulk Update Form**.
 5.  View detailed product information, including images, by clicking on a product name.
 
-* * * * *
+---
 
-📦 Sample Data
---------------
+## 📦 Sample Data
 
 Use the following JSON structure for testing:
 
@@ -238,28 +233,26 @@ Use the following JSON structure for testing:
 ]
 ```
 
-* * * * *
+---
 
-💻 Technologies Used
---------------------
+## 💻 Technologies Used
 
--   **Frontend:** React, TypeScript
--   **UI Framework:** Tailwind CSS 
--   **Backend:** Express (Mock API)
+- **Frontend:** React, TypeScript
+- **UI Framework:** Tailwind CSS
+- **Backend:** Express (Mock API)
 
-* * * * *
+---
 
-📝 License
-----------
+## 📝 License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-* * * * *
-🙌 Acknowledgments
-------------------
+---
+
+## 🙌 Acknowledgments
 
 Special thanks to Footway+ for the opportunity to work on this challenge.
 
-* * * * *
+---
 
 Feel free to let me know if you'd like me to include or modify anything!

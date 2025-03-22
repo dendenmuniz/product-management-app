@@ -169,7 +169,8 @@ export const Table = ({
         cell: ({ row }) => (
           <Link
             to={`/products/${row.original.id}`}
-            className="underline text-gray-600 hover:decoration-violet-600">
+            className="underline text-gray-600 hover:decoration-violet-600"
+          >
             {row.getValue("product_name")}
           </Link>
         ),
@@ -272,7 +273,7 @@ export const Table = ({
   }, [myTable.getState().columnFilters[0]?.id]);
 
   return (
-    <div className="p-2 overflow-auto">
+    <div className="p-2 max-w-full ">
       <div className="p-2 text-md w-64 text-gray-800 pb-2">
         <DebouncedInput
           data-testid="debounced-input-global"
@@ -282,7 +283,7 @@ export const Table = ({
           placeholder="Search all columns..."
         />
       </div>
-      <table className="table-auto overflow-auto  p-8 rounded-lg shadow-md bg-violet-50 ">
+      <table className="table-auto   p-8 rounded-lg shadow-md bg-violet-50 ">
         <thead className="pl-4 pb-4 rounded-lg shadow-sm bg-violet-100">
           {myTable.getHeaderGroups().map((headerGroup) => (
             <tr className="pl-2 text-sm text-gray-800" key={headerGroup.id}>
@@ -291,7 +292,8 @@ export const Table = ({
                   <th
                     className="pl-2 text-sm text-gray-800"
                     key={header.id}
-                    colSpan={header.colSpan}>
+                    colSpan={header.colSpan}
+                  >
                     {header.isPlaceholder ? null : (
                       <>
                         <div
@@ -300,7 +302,8 @@ export const Table = ({
                               ? "cursor-pointer select-none "
                               : "",
                             onClick: header.column.getToggleSortingHandler(),
-                          }}>
+                          }}
+                        >
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext()
@@ -331,7 +334,8 @@ export const Table = ({
             return (
               <tr
                 className="hover:bg-violet-100 odd:bg-white even:bg-violet-50"
-                key={row.id}>
+                key={row.id}
+              >
                 {row.getVisibleCells().map((cell) => {
                   return (
                     <td className="text-center " key={cell.id}>
@@ -352,25 +356,29 @@ export const Table = ({
         <button
           className="block text-sm text-gray-800 border rounded p-1 font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
           onClick={() => myTable.setPageIndex(0)}
-          disabled={!myTable.getCanPreviousPage()}>
+          disabled={!myTable.getCanPreviousPage()}
+        >
           {"<<"}
         </button>
         <button
           className="block text-sm text-gray-800 border rounded p-1 font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
           onClick={() => myTable.previousPage()}
-          disabled={!myTable.getCanPreviousPage()}>
+          disabled={!myTable.getCanPreviousPage()}
+        >
           {"<"}
         </button>
         <button
           className="block text-sm text-gray-800 border rounded p-1 font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
           onClick={() => myTable.nextPage()}
-          disabled={!myTable.getCanNextPage()}>
+          disabled={!myTable.getCanNextPage()}
+        >
           {">"}
         </button>
         <button
           className="block text-sm text-gray-800 border rounded p-1 font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
           onClick={() => myTable.setPageIndex(myTable.getPageCount() - 1)}
-          disabled={!myTable.getCanNextPage()}>
+          disabled={!myTable.getCanNextPage()}
+        >
           {">>"}
         </button>
         <span className="flex items-center gap-1 text-sm text-gray-800">
@@ -399,7 +407,8 @@ export const Table = ({
           value={myTable.getState().pagination.pageSize}
           onChange={(e) => {
             myTable.setPageSize(Number(e.target.value));
-          }}>
+          }}
+        >
           {[10, 50, 100, 200, 1000].map((pageSize) => (
             <option key={pageSize} value={pageSize}>
               Show {pageSize}
@@ -446,7 +455,8 @@ function Filter({ column }: { column: Column<any, unknown> }) {
   ) : filterVariant === "select" ? (
     <select
       onChange={(e) => column.setFilterValue(e.target.value)}
-      value={columnFilterValue?.toString()}>
+      value={columnFilterValue?.toString()}
+    >
       {/* See faceted column filters example for dynamic select options */}
       <option value="">All</option>
       <option value="false">No</option>

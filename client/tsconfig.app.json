@@ -9,7 +9,6 @@
     "outDir": "./dist",
     "rootDir": "./",
 
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "esModuleInterop": true,
@@ -18,7 +17,6 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    
 
     /* Linting */
     "strict": true,
@@ -27,6 +25,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src/**/*", "@types/**/*",  "setupTests.ts", "server/**/*"],
-  "types": ["jest","@testing-library/jest-dom"]
+  "include": ["src/**/*", "@types/**/*", "setupTests.ts", "server/**/*"],
+  "types": ["jest", "@testing-library/jest-dom"]
 }

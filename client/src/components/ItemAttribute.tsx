@@ -36,7 +36,8 @@ export const ItemAttribute = ({
             filteredArray.map((size, index) => (
               <p
                 key={index}
-                className="text-sm leading-none text-gray-600 mr-3">
+                className="text-sm leading-none text-gray-600 mr-3"
+              >
                 {size}
               </p>
             ))

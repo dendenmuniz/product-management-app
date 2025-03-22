@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useState,
-} from "react";
+import React, { createContext, ReactNode, useContext, useState } from "react";
 import { Product } from "../@types/types";
-
 
 // Define the context and types
 interface ProductsContextType {
@@ -28,7 +22,7 @@ export const ProductsProvider = ({ children }: { children: ReactNode }) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [uploadDate, setUploadDate] = useState<string | null>(null);
   const [fileId, setFileId] = useState<string | null>(null);
-  
+
   const setFileInfo = (fileName: string, uploadDate: string) => {
     setFileName(fileName);
     setUploadDate(uploadDate);
@@ -44,7 +38,8 @@ export const ProductsProvider = ({ children }: { children: ReactNode }) => {
         setFileInfo,
         fileId,
         setFileId,
-      }}>
+      }}
+    >
       {children}
     </ProductsContext.Provider>
   );
