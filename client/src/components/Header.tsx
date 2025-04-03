@@ -1,14 +1,25 @@
-interface HeaderProps {
-  sectionName: string;
-}
+import { ThemeToggle } from "./ThemeToogle";
+import { Link } from "react-router-dom";
 
-export const Header = ({ sectionName }: HeaderProps) => {
+export const Header = () => {
   return (
-    <header className="bg-white border-b shadow-sm sticky top-0 z-10">
-      <div className="flex items-center justify-between px-6 py-4">
-        <h1 className="text-2xl font-semibold text-gray-800">{sectionName}</h1>
-        {/* Placeholder para futuro: avatar, logout, etc. */}
-        {/* <div>Usuário / Logout</div> */}
+    <header className="bg-base-300 shadow-md px-6 py-4 flex justify-between items-center">
+      <Link to="/" className="text-lg font-bold text-primary">
+        Product Manager
+      </Link>
+
+      <div className="flex items-center gap-4">
+      
+        <ThemeToggle />
+        <div className="avatar avatar-online">
+        <div className="w-8 rounded-full">
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+          </div>
+        </div>
+       
+        <Link to="/login" className="btn btn-sm btn-outline">
+          Login
+        </Link>
       </div>
     </header>
   );

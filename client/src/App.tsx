@@ -10,10 +10,14 @@ import { MainLayout } from "./layouts/MainLayout";
 import { ProductPage } from "./pages/ProductPage";
 import { ProductsPage } from "./pages/ProductsPage";
 
+
+
 const App = () => {
+
+
   const router = createBrowserRouter(
     createRoutesFromElements(
-      <Route path="/" element={<MainLayout />}>
+      <Route path="/" element={<MainLayout children={undefined} />}>
         <Route index element={<HomePage />} />
         <Route path="/products/:id" element={<ProductPage />} />
         <Route path="/products" element={<ProductsPage />} />
