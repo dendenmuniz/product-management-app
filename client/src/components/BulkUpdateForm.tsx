@@ -8,48 +8,61 @@ export const BulkUpdateForm = ({
   selectedRows: number[];
   onSubmit: (updates: Partial<Pick<Product, "MSC" | "price">>) => void;
 }) => {
-  const [allowUpdate, setAllowUpdate] = useState<boolean>(false);
+  const [allowUpdate, setAllowUpdate] = useState(false);
   const [price, setPrice] = useState<string | null>(null);
   const [dropdownMsc, setDropdownMsc] = useState<string>();
+  const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if ((price || dropdownMsc) && selectedRows) {
+    if ((price || dropdownMsc) && selectedRows.length > 0) {
       setAllowUpdate(true);
     } else {
       setAllowUpdate(false);
     }
   }, [price, dropdownMsc, selectedRows]);
 
-  const handleSubmit = () => {
-    setPrice(null);
-    setDropdownMsc(undefined);
-    setAllowUpdate(false);
+  const handleSubmit = async () => {
+    setLoading(true);
+    setSuccess(null);
+
     const msc: Partial<Pick<Product, "MSC">> =
       dropdownMsc === "false"
         ? { MSC: false }
         : dropdownMsc === ""
-          ? {}
-          : { MSC: true };
+        ? {}
+        : { MSC: true };
     const priceUpdate: Partial<Pick<Product, "price">> = price ? { price } : {};
 
-    onSubmit({ ...msc, ...priceUpdate });
-    setAllowUpdate(false);
-    setPrice(null);
-    setDropdownMsc("");
+    try {
+      await onSubmit({ ...msc, ...priceUpdate });
+      setSuccess("Products updated successfully!");
+    } finally {
+      setLoading(false);
+      setPrice(null);
+      setDropdownMsc("");
+      setAllowUpdate(false);
+    }
   };
 
   return (
     <section>
-      <div className="bg-white gap-4 px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
-        <form className="grid grid-cols-3">
-          <div className="mb-4 w-48">
-            <label htmlFor="msc" className="block text-gray-700 mb-2">
-              MSC
+      <div className="bg-base-100 gap-4 p-6 mb-4 shadow-md rounded-xl border m-4 md:m-0">
+        <form className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+          {/* MSC Select */}
+          <div className="form-control w-full max-w-xs">
+            <label className="label" htmlFor="msc">
+              <span className="label-text flex gap-1 items-center">
+                MSC
+                <div className="tooltip tooltip-top" data-tip="Mark product as available on Multi-Sales Channel">
+                  <span className="text-info cursor-help">🛈</span>
+                </div>
+              </span>
             </label>
             <select
               id="msc"
               name="msc"
-              className="border rounded w-full py-2 px-3"
+              className="select select-bordered"
               value={dropdownMsc}
               onChange={(e) => setDropdownMsc(e.target.value)}
             >
@@ -59,33 +72,42 @@ export const BulkUpdateForm = ({
             </select>
           </div>
 
-          <div className="mb-4 w-48">
-            <label htmlFor="price" className="block text-gray-700 mb-2">
-              Price
+          {/* Price Input */}
+          <div className="form-control w-full max-w-xs">
+            <label className="label" htmlFor="price">
+              <span className="label-text">Price</span>
             </label>
             <input
               type="text"
               id="price"
               name="price"
-              className="border rounded w-full py-2 px-3 mb-2"
+              className="input input-bordered"
               placeholder="Whole Price"
               value={price ?? ""}
               onChange={(e) => setPrice(e.target.value)}
             />
           </div>
-          <div className="inline-block items-center py-6">
+
+          {/* Submit Button */}
+          <div className="form-control">
             <button
-              className={`${
-                !allowUpdate ? "opacity-25" : "opacity-100"
-              } inline-block bg-violet-500 hover:bg-violet-600 text-white rounded-lg px-4 py-2`}
               type="button"
-              disabled={!allowUpdate}
+              className="btn btn-primary"
+              disabled={!allowUpdate || loading}
               onClick={handleSubmit}
             >
+              {loading && <span className="loading loading-spinner loading-sm mr-2" />}
               Update Products
             </button>
           </div>
         </form>
+
+        {/* Success Message */}
+        {success && (
+          <div className="alert alert-success mt-6 shadow-sm text-sm">
+            {success}
+          </div>
+        )}
       </div>
     </section>
   );

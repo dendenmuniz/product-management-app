@@ -7,5 +7,5 @@ export const Card = ({
   bg?: string;
   classN?: string;
 }) => {
-  return <div className={`${bg} ${classN}`}>{children}</div>;
+  return <div className={`card card-border border-base-300`}>{children}</div>;
 };

@@ -11,7 +11,7 @@ export const Navbar = () => {
   ];
 
   return (
-    <Disclosure as="nav" className="navbar bg-base-100  w-full ">
+    <Disclosure as="nav" className="navbar bg-base-300  w-full ">
       <div className="container mx-auto flex items-center px-4">
         {/* Logo */}
         <img

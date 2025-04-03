@@ -21,6 +21,8 @@ import {
 } from "@tanstack/match-sorter-utils";
 import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import { IndeterminateCheckbox } from "./IndeterminateCheckbox";
+import { DebouncedInput } from "./DebouncedInput";
+import { Filter } from "./Filter";
 
 import { Link } from "react-router-dom";
 import { Product } from "../@types/types";
@@ -99,14 +101,13 @@ export const Table = ({
     setEditableRow(null);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<Product, any>[] = useMemo(
     () => [
       {
         id: "select",
         header: ({ table }) => (
           <IndeterminateCheckbox
-            className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            className="checkbox checkbox-sm"
             {...{
               checked: table.getIsAllRowsSelected(),
               indeterminate: table.getIsSomeRowsSelected(),
@@ -117,7 +118,7 @@ export const Table = ({
         cell: ({ row }) => (
           <div className="px-1">
             <IndeterminateCheckbox
-              className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              className="checkbox checkbox-sm"
               {...{
                 checked: row.getIsSelected(),
                 disabled: !row.getCanSelect(),
@@ -133,9 +134,19 @@ export const Table = ({
         header: "Actions",
         cell: ({ row }) =>
           editableRow === row.id ? (
-            <button onClick={() => handleSave(row.id)}>Save</button>
+            <button
+              onClick={() => handleSave(row.id)}
+              className="btn btn-sm btn-success"
+            >
+              Save
+            </button>
           ) : (
-            <button onClick={() => handleEdit(row.id)}>Edit</button>
+            <button
+              onClick={() => handleEdit(row.id)}
+              className="btn btn-sm btn-primary"
+            >
+              Edit
+            </button>
           ),
         meta: {
           noFilter: true,
@@ -151,7 +162,7 @@ export const Table = ({
           editableRow === row.id ? (
             <input
               type="checkbox"
-              className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              className="checkbox checkbox-sm"
               checked={row.getValue("MSC")}
               onChange={(e) => onChange(row.id, "MSC", e.target.checked)}
             />
@@ -169,7 +180,7 @@ export const Table = ({
         cell: ({ row }) => (
           <Link
             to={`/products/${row.original.id}`}
-            className="underline text-gray-600 hover:decoration-violet-600"
+            className="link link-hover text-primary"
           >
             {row.getValue("product_name")}
           </Link>
@@ -182,6 +193,7 @@ export const Table = ({
           editableRow === row.id ? (
             <input
               type="number"
+              className="input input-sm input-bordered"
               value={row.getValue("price")}
               onChange={(e) => onChange(row.id, "price", e.target.value)}
             />
@@ -199,7 +211,6 @@ export const Table = ({
       {
         accessorKey: "product_type",
         filterFn: "includesString",
-        //   sortingFn: fuzzySort,
         header: () => <span>Type</span>,
         meta: {
           filterVariant: "text",
@@ -273,122 +284,117 @@ export const Table = ({
   }, [myTable.getState().columnFilters[0]?.id]);
 
   return (
-    <div className="p-2 max-w-full ">
-      <div className="p-2 text-md w-64 text-gray-800 pb-2">
+    <div className="p-4 max-w-full">
+      <div className="form-control w-full max-w-xs mb-4">
+        <label className="label" htmlFor="global-search">
+          <span className="label-text">Search products</span>
+        </label>
         <DebouncedInput
+          id="global-search"
           data-testid="debounced-input-global"
           value={globalFilter ?? ""}
           onChange={(value) => setGlobalFilter(String(value))}
-          className="p-2 shadow border border-block"
-          placeholder="Search all columns..."
+          className="input input-bordered input-sm w-full"
+          placeholder="Type to filter all columns..."
         />
       </div>
-      <table className="table-auto   p-8 rounded-lg shadow-md bg-violet-50 ">
-        <thead className="pl-4 pb-4 rounded-lg shadow-sm bg-violet-100">
-          {myTable.getHeaderGroups().map((headerGroup) => (
-            <tr className="pl-2 text-sm text-gray-800" key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <th
-                    className="pl-2 text-sm text-gray-800"
-                    key={header.id}
-                    colSpan={header.colSpan}
-                  >
+
+      <div className="overflow-x-auto">
+        <table className="table table-zebra w-full bg-base-100 rounded-lg shadow-md">
+          <thead className="bg-base-200">
+            {myTable.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th key={header.id} colSpan={header.colSpan}>
                     {header.isPlaceholder ? null : (
                       <>
                         <div
-                          {...{
-                            className: header.column.getCanSort()
-                              ? "cursor-pointer select-none "
-                              : "",
-                            onClick: header.column.getToggleSortingHandler(),
-                          }}
+                          className={
+                            header.column.getCanSort()
+                              ? "cursor-pointer select-none"
+                              : ""
+                          }
+                          onClick={header.column.getToggleSortingHandler()}
                         >
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
                           {{
-                            asc: <FaChevronUp className="inline text-xs m-1" />,
+                            asc: (
+                              <FaChevronUp className="inline text-xs ml-1" />
+                            ),
                             desc: (
-                              <FaChevronDown className="inline text-xs m-1" />
+                              <FaChevronDown className="inline text-xs ml-1" />
                             ),
                           }[header.column.getIsSorted() as string] ?? null}
                         </div>
                         {header.column.getCanFilter() &&
                         !header.column.columnDef.meta?.noFilter ? (
-                          <div className="p-2 text-xs text-gray-800">
+                          <div className="mt-1 text-sm">
                             <Filter column={header.column} />
                           </div>
                         ) : null}
                       </>
                     )}
                   </th>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
-        <tbody className="text-sm text-gray-800">
-          {myTable.getRowModel().rows.map((row) => {
-            return (
-              <tr
-                className="hover:bg-violet-100 odd:bg-white even:bg-violet-50"
-                key={row.id}
-              >
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <td className="text-center " key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  );
-                })}
+                ))}
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <div className="h-2" />
-      <div className="flex items-center gap-2">
+            ))}
+          </thead>
+          <tbody>
+            {myTable.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="hover">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="text-center text-sm">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="h-4" />
+
+      <div className="flex flex-wrap items-center gap-2">
         <button
-          className="block text-sm text-gray-800 border rounded p-1 font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
+          className="btn btn-sm"
           onClick={() => myTable.setPageIndex(0)}
           disabled={!myTable.getCanPreviousPage()}
         >
           {"<<"}
         </button>
         <button
-          className="block text-sm text-gray-800 border rounded p-1 font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
+          className="btn btn-sm"
           onClick={() => myTable.previousPage()}
           disabled={!myTable.getCanPreviousPage()}
         >
           {"<"}
         </button>
         <button
-          className="block text-sm text-gray-800 border rounded p-1 font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
+          className="btn btn-sm"
           onClick={() => myTable.nextPage()}
           disabled={!myTable.getCanNextPage()}
         >
           {">"}
         </button>
         <button
-          className="block text-sm text-gray-800 border rounded p-1 font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
+          className="btn btn-sm"
           onClick={() => myTable.setPageIndex(myTable.getPageCount() - 1)}
           disabled={!myTable.getCanNextPage()}
         >
           {">>"}
         </button>
-        <span className="flex items-center gap-1 text-sm text-gray-800">
-          <div>Page</div>
+        <span className="text-sm">
+          Page{" "}
           <strong>
             {myTable.getState().pagination.pageIndex + 1} of{" "}
             {myTable.getPageCount()}
           </strong>
         </span>
-        <span className="flex items-center gap-1 text-sm text-gray-800">
+        <span className="flex items-center gap-1 text-sm">
           | Go to page:
           <input
             type="number"
@@ -399,11 +405,11 @@ export const Table = ({
               const page = e.target.value ? Number(e.target.value) - 1 : 0;
               myTable.setPageIndex(page);
             }}
-            className="border p-1 rounded w-16 text-sm text-gray-800"
+            className="input input-sm input-bordered w-15"
           />
         </span>
         <select
-          className="text-sm text-gray-800"
+          className="select select-sm select-bordered w-30"
           value={myTable.getState().pagination.pageSize}
           onChange={(e) => {
             myTable.setPageSize(Number(e.target.value));
@@ -416,94 +422,10 @@ export const Table = ({
           ))}
         </select>
       </div>
-      <div className="text-sm text-gray-800">
+
+      <div className="text-sm mt-2">
         {myTable.getPrePaginationRowModel().rows.length} Rows
       </div>
     </div>
   );
 };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function Filter({ column }: { column: Column<any, unknown> }) {
-  const columnFilterValue = column.getFilterValue();
-  const { filterVariant } = column.columnDef.meta ?? {};
-
-  return filterVariant === "range" ? (
-    <div>
-      <div className="flex space-x-2">
-        <DebouncedInput
-          type="number"
-          value={(columnFilterValue as [number, number])?.[0] ?? ""}
-          onChange={(value) =>
-            column.setFilterValue((old: [number, number]) => [value, old?.[1]])
-          }
-          placeholder={`Min`}
-          className="w-24 border shadow rounded"
-        />
-        <DebouncedInput
-          type="number"
-          value={(columnFilterValue as [number, number])?.[1] ?? ""}
-          onChange={(value) =>
-            column.setFilterValue((old: [number, number]) => [old?.[0], value])
-          }
-          placeholder={`Max`}
-          className="w-24 border shadow rounded"
-        />
-      </div>
-      <div className="h-1" />
-    </div>
-  ) : filterVariant === "select" ? (
-    <select
-      onChange={(e) => column.setFilterValue(e.target.value)}
-      value={columnFilterValue?.toString()}
-    >
-      {/* See faceted column filters example for dynamic select options */}
-      <option value="">All</option>
-      <option value="false">No</option>
-      <option value="true">Yes</option>
-    </select>
-  ) : (
-    <DebouncedInput
-      className="w-32 border shadow rounded"
-      onChange={(value) => column.setFilterValue(value)}
-      placeholder={`Search...`}
-      type="text"
-      value={(columnFilterValue ?? "") as string}
-    />
-    // See faceted column filters example for datalist search suggestions
-  );
-}
-
-// A typical debounced input react component
-function DebouncedInput({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}: {
-  value: string | number;
-  onChange: (value: string | number) => void;
-  debounce?: number;
-} & Omit<InputHTMLAttributes<HTMLInputElement>, "onChange">) {
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-  }, [value]);
-
-  return (
-    <input
-      {...props}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-    />
-  );
-}

@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Header } from "../components/Header";
 import { Table } from "../components/Table";
 import { FileUploader } from "../components/FileUploader";
-import { Card } from "../components/Card";
 import { BulkUpdateForm } from "../components/BulkUpdateForm";
 import { useProductsContext } from "../context/ProductsContext";
 import { Product } from "../@types/types";
@@ -38,36 +36,37 @@ export const ProductsPage = () => {
   };
 
   return (
-    <section className="bg-violet-50 min-h-screen ">
-      <Header sectionName="Products" />
+    <section className="min-h-screen bg-base-200 py-10 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h3 className="text-xl font-semibold text-base-content mb-6 px-2">
+          Products
+        </h3>
 
-      <div className="p-6">
-        <Card classN="bg-white p-6 rounded-lg shadow-md">
-          {/* Ações no topo */}
-          <div className="flex flex-wrap justify-between items-center mb-4">
-            <div className="flex gap-4">
+        <div className="card card-bordered shadow-sm bg-base-100">
+          <div className="card-body space-y-4">
+            <div className="flex justify-between items-start flex-wrap gap-4">
               <FileUploader />
-              <button className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-md font-semibold">
-                + Add Product
-              </button>
+              <button className="btn btn-primary self-start">+ Add Product</button>
             </div>
+
             {selectedRows.length > 0 && (
               <BulkUpdateForm
                 selectedRows={selectedRows}
                 onSubmit={handleUpdateBulk}
               />
             )}
-          </div>
 
-          {/* Tabela */}
-          <Table
-            products={products}
-            onChange={handleChange}
-            setSelectedRows={setSelectedRows}
-            onSave={handleSave}
-            clearSelection={bulkUpdateSuccess}
-          />
-        </Card>
+            <div className="border border-base-300 rounded-lg">
+              <Table
+                products={products}
+                onChange={handleChange}
+                setSelectedRows={setSelectedRows}
+                onSave={handleSave}
+                clearSelection={bulkUpdateSuccess}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
