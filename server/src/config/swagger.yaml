@@ -126,6 +126,98 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /auth/forgot-password:
+    post:
+        summary: Request password reset
+        description: Sends an email with instructions to reset the password.
+        tags:
+          - Authentication
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - email
+                properties:
+                  email:
+                    type: string
+                    format: email
+                    example: user@example.com
+        responses:
+          "200":
+            description: Email sent with instructions to reset password
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Email sent with instructions to reset password
+          "404":
+            description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+          "500":
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+  /auth/reset-password:
+    post:
+      summary: Reset user password
+      description: Resets the user password using the token sent via email.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - token
+                - newPassword
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                token:
+                  type: string
+                  example: a1b2c3d4...
+                newPassword:
+                  type: string
+                  example: newSecurePassword123
+      responses:
+        "200":
+          description: Password successfully reset
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password successfully reset
+        "400":
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /products:
     post:
@@ -139,25 +231,8 @@ paths:
         required: true
         content:
           application/json:
-             schema:
-              type: object
-              required:
-                - name
-                - price
-                - stock
-              properties:
-                name:
-                  type: string
-                  example: "Logitech Wireless Mouse"
-                description:
-                  type: string
-                  example: "A high-precision wireless mouse"
-                price:
-                  type: number
-                  example: 49.99
-                stock:
-                  type: integer
-                  example: 10
+            schema:
+              $ref: "#/components/schemas/Product"
       responses:
         "201":
           description: Product successfully created
@@ -169,34 +244,24 @@ paths:
           description: Invalid request
           content:
             application/json:
-              examples:
-                invalidData:
-                  summary: Prisma validation error
-                  value:
-                    message: "Validation failed"
-                    errors:
-                      - field: "name"
-                        message: "Name must have at least 3 characters"
-                      - field: "price"
-                        message: "Price must be greater than zero"
-                      - field: "stock"
-                        message: "Stock cannot be negative"
+              schema:
+                $ref: "#/components/schemas/ValidationError"
         "403":
           description: Unauthorized
           content:
             application/json:
-              examples:
-                unauthorized:
-                  summary: User is not allowed to create a product
-                  value:
-                    message: "Unauthorized - Only sellers can create products"
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized - Only sellers can create products"
         "500":
           description: Internal server error
           content:
             application/json:
               schema:
-                 schema:
-              $ref: "#/components/schemas/ValidationError"
+                $ref: "#/components/schemas/ErrorResponse"
     get:
       summary: Get all products
       description: Retrieves a list of all registered products.
@@ -218,6 +283,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  
+  /products/import:
+    post:
+      summary: Import multiple products
+      description: Bulk import products by sending an array of product objects.
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Product"
+      responses:
+        "201":
+          description: Products imported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  importedCount:
+                    type: integer
+                    example: 20
+                  message:
+                    type: string
+                    example: Products imported successfully
+        "400":
+          description: Invalid file or format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized - Only sellers can import products"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /products/{id}:
     get:
       summary: Get a product by id
@@ -265,7 +384,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
     put:
       summary: Updates a product with form data
       description: ""
@@ -338,7 +456,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
     delete:
       summary: Deletes a product
       description: delete a product
@@ -429,6 +546,17 @@ components:
             - client
           example: "admin"
           description: "Role must be 'seller', 'admin', or 'client'"
+        resetPasswordToken:
+          type: string
+          nullable: true
+          example: "4f92c4cf2931d7cbd82f6225b3db5c77"
+          description: Token used to reset the user's password (expires in 1h)
+        resetPasswordExpires:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-04-04T13:00:00.000Z"
+          description: Expiration date and time for the reset password token
         createdAt:
           type: string
           format: date-time
@@ -456,70 +584,82 @@ components:
               message:
                 type: string
                 example: "Invalid email format"
-
     Product:
       type: object
       required:
-        - name
+        - product_name
         - price
-        - stock
+        - quantity
+        - merchant_id
+        - userId
       properties:
         id:
           type: string
           format: uuid
           example: "2d8f9077-e86e-4a44-a310-726b33c0d2a9"
-        name:
+        product_name:
           type: string
-          minLength: 3
           example: "Logitech Wireless Mouse"
-          description: "Name must have at least 3 characters"
         description:
           type: string
           example: "A high-precision wireless mouse"
-          description: "Optional product description"
         price:
           type: number
-          minimum: 0.01
           example: 49.99
-          description: "Price must be greater than zero"
-        stock:
+        quantity:
           type: integer
-          minimum: 0
           example: 10
-          description: "Stock cannot be negative"
+        MSC:
+          type: boolean
+          example: true
+        product_type:
+          type: array
+          items:
+            type: string
+          example: ["Apparels"]
+        product_group:
+          type: array
+          items:
+            type: string
+          example: ["Hats & Caps"]
+        department:
+          type: array
+          items:
+            type: string
+          example: ["Men"]
+        size:
+          type: string
+          example: "ONESIZE"
+        image_url:
+          type: string
+          format: uri
+          example: "https://images.footway.com/02/60969-85_002.png"
+        supplier_model_number:
+          type: string
+          example: "60298444"
+        ean:
+          type: array
+          items:
+            type: string
+          example: ["196818661462"]
+        variant_id:
+          type: string
+          example: "2025646"
+        merchant_id:
+          type: string
+          example: "SOL"
         createdAt:
           type: string
           format: date-time
           example: "2021-09-01T00:00:00.000Z"
-          description: "Timestamp of when the product was created (auto-generated)"
         updatedAt:
           type: string
           format: date-time
           example: "2023-09-02T14:30:00.000Z"
-          description: "Timestamp of last update (auto-generated)"
         userId:
           type: string
           format: uuid
           example: "be4d9b15-4b68-4efe-adbf-aa14642ebe49"
-          description: "ID of the user who created the product (auto-generated)"
-      ValidationError:
-        type: object
-        properties:
-          message:
-            type: string
-            example: "Validation failed"
-          errors:
-            type: array
-            items:
-              type: object
-              properties:
-                field:
-                  type: string
-                  example: "price"
-                message:
-                  type: string
-                  example: "Price must be greater than zero"
-
     ErrorResponse:
       type: object
       properties:

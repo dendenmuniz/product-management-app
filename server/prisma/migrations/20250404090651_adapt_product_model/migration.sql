@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "department" TEXT[],
+ADD COLUMN     "ean" TEXT[],
+ADD COLUMN     "imageUrl" TEXT,
+ADD COLUMN     "inventoryLevelCreated" TIMESTAMP(3),
+ADD COLUMN     "inventoryLevelUpdated" TIMESTAMP(3),
+ADD COLUMN     "merchantId" TEXT,
+ADD COLUMN     "productGroup" TEXT[],
+ADD COLUMN     "productType" TEXT[],
+ADD COLUMN     "size" TEXT,
+ADD COLUMN     "supplierModelNumber" TEXT,
+ADD COLUMN     "variantCreated" TIMESTAMP(3),
+ADD COLUMN     "variantId" TEXT,
+ADD COLUMN     "variantUpdated" TIMESTAMP(3),
+ADD COLUMN     "vendor" TEXT;

@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { errorHandler } from '../../middlewares/errorHandler';
-import authRoutes from '../../routes/auth';
-import productsRoutes from '../../routes/products';
+import authRoutes from '../../routes/authRoutes';
+import productsRoutes from '../../routes/productRoutes';
 
 export const createTestServer = () => {
   const app = express();
