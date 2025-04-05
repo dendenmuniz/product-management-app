@@ -4,11 +4,12 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
-import { ProductsProvider } from "./context/ProductsContext";
 import { HomePage } from "./pages/HomePage";
 import { MainLayout } from "./layouts/MainLayout";
 import { ProductPage } from "./pages/ProductPage";
 import { ProductsPage } from "./pages/ProductsPage";
+import { AppProviders } from "./context/AppProviders";
+import { LoginPage } from "./pages/LoginPage";
 
 
 
@@ -21,13 +22,14 @@ const App = () => {
         <Route index element={<HomePage />} />
         <Route path="/products/:id" element={<ProductPage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Route>
     )
   );
   return (
-    <ProductsProvider>
+    <AppProviders>
       <RouterProvider router={router} />
-    </ProductsProvider>
+    </AppProviders>
   );
 };
 
