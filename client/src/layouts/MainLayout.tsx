@@ -1,20 +1,15 @@
 import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { Navbar } from "../components/Navbar";
+import { useAuthContext } from "../context/AuthContext";
 import { Sidebar } from "../components/Sidebar";
 import { Header } from "../components/Header";
 
-// TODO: Replace with actual auth check
-const isLoggedIn = true; // ou useContext(AuthContext) no futuro
-
 export const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuthContext();
   return (
     <>
       <div className="flex min-h-screen relative">
-        {/* Sidebar */}
-        <div className="z-50">
-          <Sidebar />
-        </div>
+        <div className="z-50">{user && <Sidebar />}</div>
 
         {/* Conteúdo principal */}
         <div className="flex flex-1 flex-col">

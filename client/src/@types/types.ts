@@ -1,3 +1,11 @@
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "seller" | "client";
+  avatar?: string;
+}
+
 export interface Product {
   id: number;
   merchant_id: string;

@@ -1,20 +1,26 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   HomeIcon,
   ArchiveBoxIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
+import { useAuthContext } from "../context/AuthContext";
 
 export const Sidebar = () => {
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { logout } = useAuthContext();
 
   const iconClass = "w-5 h-5";
 
   const menuItems = [
     { to: "/", label: "Dashboard", icon: <HomeIcon className={iconClass} /> },
     { to: "/products", label: "Products", icon: <ArchiveBoxIcon className={iconClass} /> },
-    { to: "/login", label: "Login", icon: <UserIcon className={iconClass} /> },
+    { label: "Logout", action: () => {
+      logout();
+      navigate("/");
+  }, icon: <UserIcon className={iconClass} /> },
   ];
 
   return (
@@ -33,10 +39,11 @@ export const Sidebar = () => {
         </button>
 
         <ul className="menu space-y-2">
-          {menuItems.map(({ to, label, icon }) => (
+          {menuItems.map(({ to, label, icon, action }) => (
             <li key={to}>
+               {to ? (
               <NavLink
-                to={to}
+                to={label} 
                 className={({ isActive }) =>
                   `flex items-center gap-3 p-2 rounded-lg ${
                     isActive ? "text-primary font-semibold" : "text-base-content"
@@ -51,8 +58,22 @@ export const Sidebar = () => {
                 </div>
                 {!isCollapsed && <span>{label}</span>}
               </NavLink>
-            </li>
-          ))}
+          ) : (
+            <button
+              onClick={action}
+              className="flex items-center gap-3 p-2 rounded-lg text-base-content hover:bg-base-100 w-full text-left"
+            >
+              <div
+                className={isCollapsed ? "tooltip tooltip-right z-50" : ""}
+                data-tip={isCollapsed ? label : ""}
+              >
+                {icon}
+              </div>
+              {!isCollapsed && <span>{label}</span>}
+            </button>
+          )}
+        </li>
+      ))}
         </ul>
       </div>
     </aside>
