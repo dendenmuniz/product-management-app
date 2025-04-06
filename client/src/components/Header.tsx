@@ -3,12 +3,6 @@ import { ThemeToggle } from "./ThemeToogle";
 import { useAuthContext } from "../context/AuthContext";
 
 
-// Simulando estado de login (substitua por auth real depois)
-// const user = {
-//   name: "Denise",
-//   avatar:
-//     "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp",
-// };
 
 export const Header = () => {
   const { user, logout } = useAuthContext();
@@ -21,10 +15,12 @@ export const Header = () => {
 
   return (
     <header className="bg-base-300 shadow-md px-6 py-4 flex justify-between items-center">
+      <div className="flex items-center gap-4">
+      <img src="/queenbee.png" className="size-10" />
       <Link to="/" className="text-lg font-bold text-primary">
-        Product Manager
+        Queen Bee Product Management
       </Link>
-
+      </div>
       <div className="flex items-center gap-4">
         <ThemeToggle />
 
