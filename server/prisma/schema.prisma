@@ -8,12 +8,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  admin
+  seller
+}
+
+
 model User {
   id                   String   @id @default(uuid())
   name                 String
   email                String   @unique
   password             String
-  role                 String  // admin, seller
+  role                 Role @default(seller)  // admin, seller
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
   createdAt            DateTime @default(now())
@@ -44,10 +50,24 @@ model Product {
   variantUpdated         DateTime?
   inventoryLevelCreated  DateTime?
   inventoryLevelUpdated  DateTime?
-
+  msc                    Boolean @default(false)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
   userId           String
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  importLogId    Int?
+  importLog      ProductImportLog? @relation(fields: [importLogId], references: [id])
 }
+
+model ProductImportLog {
+  id           Int       @id @default(autoincrement())
+  fileName     String
+  uploadedAt   DateTime  @default(now())
+  uploadedBy   String?   // optional — to track who did it (e.g. email, id, etc.)
+  totalItems   Int       // quantity of imported products
+  notes        String?   // optional — error, status, any notes
+
+  products     Product[]
+}
+
