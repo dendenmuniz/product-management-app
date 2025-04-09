@@ -16,8 +16,12 @@ export const userSchema = z.object({
       required_error: 'Password is required',
     })
     .min(8, { message: 'Password must have at least 8 characters' }),
-  role: z.enum(['seller', 'admin', 'client'], {
+  role: z.enum(['seller', 'admin'], {
     required_error: 'Role is required',
     invalid_type_error: "Role must be 'seller' or 'admin'",
   }),
+  msc: z.boolean()
+    .optional()
+    .default(false)
+    .transform((val) => (val ? true : false)),
 });
