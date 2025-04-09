@@ -6,7 +6,7 @@ export const BulkUpdateForm = ({
   onSubmit,
 }: {
   selectedRows: number[];
-  onSubmit: (updates: Partial<Pick<Product, "MSC" | "price">>) => void;
+  onSubmit: (updates: Partial<Pick<Product, "msc" | "price">>) => void;
 }) => {
   const [allowUpdate, setAllowUpdate] = useState(false);
   const [price, setPrice] = useState<string | null>(null);
@@ -26,12 +26,12 @@ export const BulkUpdateForm = ({
     setLoading(true);
     setSuccess(null);
 
-    const msc: Partial<Pick<Product, "MSC">> =
+    const msc: Partial<Pick<Product, "msc">> =
       dropdownMsc === "false"
-        ? { MSC: false }
+        ? { msc: false }
         : dropdownMsc === ""
         ? {}
-        : { MSC: true };
+        : { msc: true };
     const priceUpdate: Partial<Pick<Product, "price">> = price ? { price } : {};
 
     try {

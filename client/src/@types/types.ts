@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "seller" | "client";
+  role: "admin" | "seller" ;
   avatar?: string;
 }
 
@@ -12,7 +12,6 @@ export interface Product {
   description?: string;
   price: string;
   stock: number;
-
   merchantId?: string;
   variantId?: string;
   supplierModelNumber?: string;
@@ -23,15 +22,15 @@ export interface Product {
   productGroup: string[];
   department: string[];
   imageUrl?: string;
-
   variantCreated?: string;
   variantUpdated?: string;
   inventoryLevelCreated?: string;
   inventoryLevelUpdated?: string;
-
   createdAt: string;
   updatedAt: string;
   userId: string;
+  msc?: boolean;
+  wholeSalePrice?: string;
 }
 
 export interface LastUploadFile {

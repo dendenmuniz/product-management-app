@@ -10,7 +10,7 @@ export const ProductPage = () => {
   const navigate = useNavigate();
   const { products } = useProductsContext();
 
-  const product = products.find((p) => p.id === Number(id));
+  const product = products.find((p) => p.id === id);
   const isLoading = !product;
 
   return (
@@ -39,16 +39,16 @@ export const ProductPage = () => {
             </div>
           ) : (
             <div className="md:flex items-start justify-center gap-8">
-              <ItemImage alt={product.product_name} url={product.image_url} />
+              <ItemImage alt={product.name} url={product.imageUrl || ""} />
 
               <div className="flex-1 mt-6 md:mt-0">
                 <ItemHeader
                   itemManufector={
                     <div className="tooltip tooltip-top" data-tip="Merchant ID">
-                      <span className="text-sm font-medium text-gray-700">{product.merchant_id}</span>
+                      <span className="text-sm font-medium text-gray-700">{product.merchantId}</span>
                     </div>
                   }
-                  itemName={product.product_name}
+                  itemName={product.name}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -58,10 +58,10 @@ export const ProductPage = () => {
                         Model
                       </span>
                     }
-                    attributeValue={product.supplier_model_number}
+                    attributeValue={product.supplierModelNumber}
                   />
                   <ItemAttribute attribute="Size" attributeValue={product.size} />
-                  <ItemAttribute attribute="Quantity" attributeValue={product.quantity.toString()} />
+                  <ItemAttribute attribute="Quantity" attributeValue={product.stock} />
                   <ItemAttribute attribute="Vendor" attributeValue={product.vendor} />
                   <ItemAttribute attribute="Price" attributeValue={product.price} />
                   <ItemAttribute
@@ -71,19 +71,19 @@ export const ProductPage = () => {
                       </span>
                     }
                     attributeValue={
-                      <div className={`badge ${product.MSC ? "badge-success" : "badge-ghost"}`}>
-                        {product.MSC ? "Yes" : "No"}
+                      <div className={`badge ${product.msc ? "badge-success" : "badge-ghost"}`}>
+                        {product.msc ? "Yes" : "No"}
                       </div>
                     }
                   />
-                  <ItemAttribute attribute="Type" attributeValue={product.product_type} />
+                  <ItemAttribute attribute="Type" attributeValue={product.productType} />
                   <ItemAttribute
                     attribute={
                       <span className="tooltip tooltip-top" data-tip="Internal grouping of products">
                         Group
                       </span>
                     }
-                    attributeValue={product.product_group}
+                    attributeValue={product.productGroup}
                   />
                   <ItemAttribute
                     attribute={
@@ -96,7 +96,7 @@ export const ProductPage = () => {
                 </div>
 
                 <div className="mt-6">
-                  <ItemDescription description={product.product_description} />
+                  <ItemDescription description={product.description || ''} />
                 </div>
               </div>
             </div>

@@ -47,7 +47,7 @@ export const FileUploader = () => {
           uploadDate: dateUpload,
           products: jsonData.map((product: Product) => ({
             ...product,
-            MSC: false,
+            msc: false,
           })),
         };
 

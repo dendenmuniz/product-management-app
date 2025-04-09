@@ -5,11 +5,13 @@ import {
   httpUploadProducts,
   httpUpdateProducts,
   httpUpdateProductsBulk,
-} from "./requests";
+} from "../services/productService";
 import { useProductsContext } from "../context/ProductsContext";
+import { useAuthContext } from "../context/AuthContext";
 
 export const useProducts = () => {
   const { products, setProducts } = useProductsContext();
+  const { token } = useAuthContext();
 
   const loadProducts = async () => {
     try {
@@ -25,9 +27,10 @@ export const useProducts = () => {
     fileName: string;
     uploadDate: string;
   }) => {
+    console.log(products);
     try {
-      const responseData = await httpUploadProducts(data);
-      setProducts(responseData); // Update products via context
+      const responseData = await httpUploadProducts(data, token ?? undefined);
+      setProducts(responseData);
       toast.success("File uploaded successfully");
     } catch (err) {
       toast.error((err as Error).message);
@@ -36,7 +39,7 @@ export const useProducts = () => {
 
   const handleUpdateProducts = async (product: Product) => {
     try {
-      await httpUpdateProducts(product);
+      await httpUpdateProducts(product, token ?? undefined);
       toast.success("Product(s) updated successfully");
       // Reload products after update
       loadProducts();
@@ -46,12 +49,12 @@ export const useProducts = () => {
   };
 
   const handleUpdateBulkProducts = async (
-    updates: Partial<Pick<Product, "MSC" | "price">>,
+    updates: Partial<Pick<Product, "msc" | "price">>,
     selectedRows: number[]
   ) => {
     try {
       const newValues = products.map((product: Product) => {
-        if (selectedRows.includes(product.id)) {
+        if (selectedRows.includes(Number(product.id))) {
           return { ...product, ...updates };
         }
         return product;
@@ -59,7 +62,10 @@ export const useProducts = () => {
 
       setProducts(newValues);
 
-      const response = await httpUpdateProductsBulk(newValues);
+      const response = await httpUpdateProductsBulk(
+        newValues,
+        token ?? undefined
+      );
       if (response.status === 200) {
         toast.success("Products updated successfully");
       }

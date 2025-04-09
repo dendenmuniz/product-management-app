@@ -12,6 +12,7 @@ export const ProductsPage = () => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [bulkUpdateSuccess, setBulkUpdateSuccess] = useState<boolean>(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (rowId: string, columnId: keyof Product, value: any) => {
     setProducts((prev) =>
       prev.map((product, index) =>
@@ -27,7 +28,7 @@ export const ProductsPage = () => {
   };
 
   const handleUpdateBulk = async (
-    updates: Partial<Pick<Product, "MSC" | "price">>
+    updates: Partial<Pick<Product, "msc" | "price">>
   ) => {
     const response = await handleUpdateBulkProducts(updates, selectedRows);
     if (response) {
