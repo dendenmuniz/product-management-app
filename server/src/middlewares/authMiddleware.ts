@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { Role } from '@prisma/client';
 import { createError } from './errorHandler';
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -7,15 +8,9 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 interface DecodedToken {
   id: string;
   email: string;
-  role: string;
+  role: Role | string;
 }
 
-//extend the Express Request type to include a user property
-declare module 'express' {
-  interface Request {
-    user?: DecodedToken;
-  }
-}
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization || "";
@@ -28,9 +23,16 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;
+
+    const normalizedRole = decoded.role.toLowerCase();
+
+    if (normalizedRole !== 'admin' && normalizedRole !== 'seller') {
+      return next(createError('Unauthorized - Invalid role in token', 403));
+    }
+
     req.user = {
-      ...decoded,
-      role: decoded.role.toLowerCase(), //normalize the role
+      id: decoded.id,
+      role: normalizedRole as Role, // safely cast to Prisma's enum
     };
 
     next();

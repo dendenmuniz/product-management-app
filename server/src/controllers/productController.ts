@@ -5,8 +5,46 @@ import { productSchema } from "../schemas/productSchema";
 import { createError } from "../middlewares/errorHandler";
 import { z } from "zod";
 
+
 const prisma = new PrismaClient();
 
+// Helper function to check if user is authenticated
+function requireUserOrFail(req: Request, next: NextFunction) {
+  if (!req.user) {
+    next(createError("Unauthorized - Missing user", 401));
+    throw new Error(); 
+  }
+  return req.user;
+}
+
+function normalizeProduct(p: any) {
+  return {
+    merchantId: p.merchant_id,
+    variantId: p.variant_id?.toString(),
+    name: p.product_name,
+    supplierModelNumber: p.supplier_model_number,
+    ean: p.ean,
+    size: p.size,
+    vendor: p.vendor,
+    stock: p.quantity,
+    productType: p.product_type,
+    productGroup: p.product_group,
+    department: p.department,
+    variantCreated: p.variant_created,
+    variantUpdated: p.variant_updated,
+    inventoryLevelCreated: p.inventory_level_created,
+    inventoryLevelUpdated: p.inventory_level_updated,
+    imageUrl: p.image_url,
+    price: parseFloat(p.price),
+    description: p.product_description,
+    msc: p.msc,
+  };
+}
+
+function validUUID(id: string) {
+  const uuidRegex = /^[0-9a-fA-F-]{36}$/;
+  return uuidRegex.test(id);
+}
 // Create product
 export const createProduct = async (
   req: Request,
@@ -14,7 +52,7 @@ export const createProduct = async (
   next: NextFunction
 ) => {
   try {
-    const { role, id } = req.user!;
+    const { id: userId, role } = requireUserOrFail(req, next);
 
     if (role !== "seller") {
       return next(
@@ -31,7 +69,7 @@ export const createProduct = async (
     const product = await prisma.product.create({
       data: {
         ...result.data,
-        userId: id,
+        userId,
       },
     });
 
@@ -48,23 +86,53 @@ export const importProducts = async (
   res: Response,
   next: NextFunction
 ) => {
-  const productArraySchema = z.array(productSchema);
-  const parsed = productArraySchema.safeParse(req.body);
+  try {
+    const { id: userId } = requireUserOrFail(req, next);
 
-  if (!parsed.success) {
-    return next(createError("Validation failed", 400, parsed.error.flatten()));
+    const { fileName, uploadDate, products } = req.body;
+
+    const normalizedProducts = products.map(normalizeProduct);
+
+    const productArraySchema = z.array(productSchema);
+    const parsed = productArraySchema.safeParse(normalizedProducts);
+
+    if (!parsed.success) {
+      return next(
+        createError("Validation failed", 400, parsed.error.flatten())
+      );
+    }
+
+    const validatedProducts = parsed.data;
+
+    // Create a new import log entry
+    const importLog = await prisma.productImportLog.create({
+      data: {
+        fileName,
+        uploadedAt: new Date(uploadDate),
+        uploadedBy: userId,
+        totalItems: validatedProducts.length,
+      },
+    });
+
+    // Create products in the database
+    const created = await prisma.product.createMany({
+      data: validatedProducts.map((p) => ({
+        ...p,
+        userId,
+        importLogId: importLog.id,
+      })),
+      skipDuplicates: true,
+    });
+
+    res.status(201).json({
+      message: "Products imported",
+      count: created.count,
+      fileName,
+      uploadedAt: importLog.uploadedAt,
+    });
+  } catch (err) {
+    next(err);
   }
-
-  const products = parsed.data;
-  const created = await prisma.product.createMany({
-    data: products.map((p) => ({
-      ...p,
-      userId: req.user?.id || "anonymous",
-    })),
-    skipDuplicates: true,
-  });
-
-  res.status(201).json({ message: "Products imported", count: created.count });
 };
 
 // Get all
@@ -91,7 +159,7 @@ export const getProductById = async (
 ) => {
   const { id } = req.params;
 
-  if (!id.match(/^[0-9a-fA-F-]{36}$/)) {
+  if (validUUID(id) === false) {
     return next(createError("Invalid product ID", 400));
   }
 
@@ -110,8 +178,12 @@ export const updateProduct = async (
   next: NextFunction
 ) => {
   try {
-    const { id: userId, role } = req.user!;
+    const { id: userId, role } = requireUserOrFail(req, next);
     const { id } = req.params;
+
+    if (validUUID(id) === false) {
+      return next(createError("Invalid product ID", 400));
+    }
 
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) {
@@ -147,8 +219,12 @@ export const deleteProduct = async (
   next: NextFunction
 ) => {
   try {
-    const { id: userId, role } = req.user!;
+    const { id: userId, role } = requireUserOrFail(req, next);
     const { id } = req.params;
+
+    if (validUUID(id) === false) {
+      return next(createError("Invalid product ID", 400));
+    }
 
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) {
