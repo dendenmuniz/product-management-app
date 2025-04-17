@@ -21,6 +21,7 @@ const App = () => {
       <Route path="/" element={<MainLayout children={undefined} />}>
         <Route index element={<HomePage />} />
         <Route path="/products/:id" element={<ProductPage />} />
+        <Route path="/products/new" element={<ProductPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Route>

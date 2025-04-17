@@ -6,6 +6,7 @@ import { useProductsContext } from "../context/ProductsContext";
 import { Product } from "../@types/types";
 import { useProducts } from "../hooks/useProducts";
 import { useAuthContext } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
 
 export const ProductsPage = () => {
@@ -58,7 +59,7 @@ export const ProductsPage = () => {
           <div className="card-body ">
             <div className="flex justify-between items-start flex-wrap gap-4">
               <FileUploader />
-              <button className="btn btn-primary self-start">+ Add Product</button>
+              <Link to="/products/new" className="btn btn-primary self-start">+ Add Product</Link>
             </div>
 
             {selectedRows.length > 0 && (
