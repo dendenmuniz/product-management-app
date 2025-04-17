@@ -31,7 +31,7 @@ export const Header = () => {
               <img
                   src={
                     user.avatar ||
-                    "https://avatars.dicebear.com/api/initials/user.svg"
+                    "https://api.dicebear.com/9.x/lorelei/svg"
                   }
                   alt={user.name || "User"}
                   loading="lazy"
