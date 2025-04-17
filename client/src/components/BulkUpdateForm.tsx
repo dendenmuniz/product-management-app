@@ -5,7 +5,7 @@ export const BulkUpdateForm = ({
   selectedRows,
   onSubmit,
 }: {
-  selectedRows: number[];
+  selectedRows: string[];
   onSubmit: (updates: Partial<Pick<Product, "msc" | "price">>) => void;
 }) => {
   const [allowUpdate, setAllowUpdate] = useState(false);

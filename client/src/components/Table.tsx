@@ -1,6 +1,5 @@
-import { useState, useMemo, InputHTMLAttributes, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
-  Column,
   ColumnDef,
   ColumnFiltersState,
   RowData,
@@ -26,6 +25,7 @@ import { Filter } from "./Filter";
 
 import { Link } from "react-router-dom";
 import { Product } from "../@types/types";
+
 
 declare module "@tanstack/react-table" {
   //allows us to define custom properties for our columns
@@ -82,7 +82,7 @@ export const Table = ({
     columnId: keyof Product,
     value: string | number | boolean
   ) => void;
-  setSelectedRows: React.Dispatch<React.SetStateAction<number[]>>;
+  setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   onSave: (rowId: string) => void;
   products: Product[];
   clearSelection: boolean;
@@ -100,7 +100,8 @@ export const Table = ({
     onSave(rowId);
     setEditableRow(null);
   };
-
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<Product, any>[] = useMemo(
     () => [
       {
@@ -153,7 +154,7 @@ export const Table = ({
         },
       },
       {
-        accessorKey: "MSC",
+        accessorKey: "msc",
         header: () => <span>MSC</span>,
         meta: {
           filterVariant: "select",
@@ -163,17 +164,17 @@ export const Table = ({
             <input
               type="checkbox"
               className="checkbox checkbox-sm"
-              checked={row.getValue("MSC")}
-              onChange={(e) => onChange(row.id, "MSC", e.target.checked)}
+              checked={row.getValue("msc")}
+              onChange={(e) => onChange(row.id, "msc", e.target.checked)}
             />
-          ) : row.getValue<string>("MSC") ? (
+          ) : row.getValue<string>("msc") ? (
             "Yes"
           ) : (
             "No"
           ),
       },
       {
-        accessorKey: "product_name",
+        accessorKey: "name",
         filterFn: "includesString",
         sortingFn: fuzzySort,
         header: () => <span>Product</span>,
@@ -182,7 +183,7 @@ export const Table = ({
             to={`/products/${row.original.id}`}
             className="link link-hover text-primary"
           >
-            {row.getValue("product_name")}
+            {row.getValue("name")}
           </Link>
         ),
       },
@@ -202,14 +203,14 @@ export const Table = ({
           ),
       },
       {
-        accessorKey: "quantity",
+        accessorKey: "stock",
         header: () => <span>Quantity</span>,
         meta: {
           filterVariant: "range",
         },
       },
       {
-        accessorKey: "product_type",
+        accessorKey: "productType",
         filterFn: "includesString",
         header: () => <span>Type</span>,
         meta: {
@@ -226,7 +227,7 @@ export const Table = ({
         },
       },
       {
-        accessorKey: "product_group",
+        accessorKey: "productGroup",
         filterFn: "includesString",
         sortingFn: fuzzySort,
         header: () => <span>Group</span>,
@@ -284,7 +285,7 @@ export const Table = ({
   }, [myTable.getState().columnFilters[0]?.id]);
 
   return (
-    <div className="p-4 max-w-full">
+    <div className="p-4 max-w-full"> 
       <div className="form-control w-full max-w-xs mb-4">
         <label className="label" htmlFor="global-search">
           <span className="label-text">Search products</span>
@@ -299,8 +300,9 @@ export const Table = ({
         />
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="table table-zebra w-full bg-base-100 rounded-lg shadow-md">
+      <div className="overflow-x-auto"> 
+   
+        <table className="table table-zebra w-full md:min-w-full bg-base-100 rounded-lg shadow-md ">
           <thead className="bg-base-200">
             {myTable.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -354,6 +356,7 @@ export const Table = ({
             ))}
           </tbody>
         </table>
+     
       </div>
 
       <div className="h-4" />

@@ -2,6 +2,7 @@ import { Column } from "@tanstack/react-table";
 import { DebouncedInput } from "./DebouncedInput";
 
 // Você pode tipar melhor se tiver um tipo customizado para suas colunas
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const Filter = ({ column }: { column: Column<any, unknown> }) => {
   const columnFilterValue = column.getFilterValue();
   const { filterVariant } = column.columnDef.meta ?? {};
@@ -29,7 +30,7 @@ export const Filter = ({ column }: { column: Column<any, unknown> }) => {
     </div>
   ) : filterVariant === "select" ? (
     <select
-      className="select select-sm select-bordered"
+      className="select select-sm select-bordered w-16"
       onChange={(e) => column.setFilterValue(e.target.value)}
       value={columnFilterValue?.toString()}
     >

@@ -38,11 +38,12 @@ export const Sidebar = () => {
           {isCollapsed ? "➡" : "⬅"}
         </button>
 
-        <ul className="menu space-y-2">
+        <ul className="menu space-y-2" key='ulside'>
           {menuItems.map(({ to, label, icon, action }) => (
             <li key={to}>
                {to ? (
               <NavLink
+              key={`navlink-${to}`}
                 to={label} 
                 className={({ isActive }) =>
                   `flex items-center gap-3 p-2 rounded-lg ${
@@ -50,7 +51,7 @@ export const Sidebar = () => {
                   } hover:bg-base-100`
                 }
               >
-                <div
+                <div  key={`div-${to}`}
                   className={isCollapsed ? "tooltip tooltip-right z-50" : ""}
                   data-tip={isCollapsed ? label : ""}
                 >
@@ -60,10 +61,12 @@ export const Sidebar = () => {
               </NavLink>
           ) : (
             <button
+            key={`btn-${to}`}
               onClick={action}
               className="flex items-center gap-3 p-2 rounded-lg text-base-content hover:bg-base-100 w-full text-left"
             >
               <div
+               key={`divicon-${to}`}
                 className={isCollapsed ? "tooltip tooltip-right z-50" : ""}
                 data-tip={isCollapsed ? label : ""}
               >

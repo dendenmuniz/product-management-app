@@ -37,3 +37,9 @@ export interface LastUploadFile {
   fileName: string;
   uploadDate: string;
 }
+
+export interface BulkProductUpdate {
+  id: string;
+  msc?: boolean;
+  price?: string;
+}

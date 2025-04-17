@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../@types/types";
 import { isTokenExpired } from "../utils/auth";
 
-
 interface AuthContextType {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -10,11 +9,10 @@ interface AuthContextType {
   setToken: React.Dispatch<React.SetStateAction<string | null>>;
   login: (user: User, token: string) => void;
   logout: () => void;
-} 
+}
 
-const AuthContext  = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-// Define the context and types
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -22,29 +20,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = (user: User, token: string) => {
     setUser(user);
     setToken(token);
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   useEffect(() => {
-   
-      if (token && isTokenExpired(token)) {
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    if (storedToken && storedUser) {
+      if (!isTokenExpired(storedToken)) {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      } else {
         logout();
-      } 
-   
-  }, [token]);
+      }
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, setUser, setToken }}>
-    {children}
-  </AuthContext.Provider>
-);
+    <AuthContext.Provider
+      value={{ user, token, login, logout, setUser, setToken }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// This hook is used to access the authentication context in components
 export const useAuthContext = () => {
   const context = useContext(AuthContext);
   if (!context) {

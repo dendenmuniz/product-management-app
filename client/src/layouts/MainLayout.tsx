@@ -9,11 +9,15 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div className="flex min-h-screen relative">
-        <div className="z-50">{user && <Sidebar />}</div>
-
-        {/* Conteúdo principal */}
+       
+      {user && (
+        <aside className="bg-base-200 z-40">
+          <Sidebar />
+        </aside>
+      )}
         <div className="flex flex-1 flex-col">
           <Header />
+          
           <main className="flex-1 p-6 overflow-x-hidden z-0">
             <Outlet />
             {children}

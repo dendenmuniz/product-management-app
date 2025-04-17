@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { Product } from "../@types/types";
+import { BulkProductUpdate, Product } from "../@types/types";
 import {
   httpGetProducts,
   httpUploadProducts,
@@ -15,8 +15,8 @@ export const useProducts = () => {
 
   const loadProducts = async () => {
     try {
-      const data = await httpGetProducts();
-      setProducts(data.products);
+      const data = await httpGetProducts(token ?? undefined);
+      setProducts(data);
     } catch (err) {
       toast.error((err as Error).message);
     }
@@ -50,26 +50,32 @@ export const useProducts = () => {
 
   const handleUpdateBulkProducts = async (
     updates: Partial<Pick<Product, "msc" | "price">>,
-    selectedRows: number[]
+    selectedRows: string[]
   ) => {
     try {
+      const updatedSelection: BulkProductUpdate[] = selectedRows.map((id) => ({
+        id,
+        ...updates,
+      }));
+  
+      // Atualiza localmente (se quiser feedback visual instantâneo)
       const newValues = products.map((product: Product) => {
-        if (selectedRows.includes(Number(product.id))) {
+        if (selectedRows.includes(product.id)) {
           return { ...product, ...updates };
         }
         return product;
       });
-
       setProducts(newValues);
-
+  
       const response = await httpUpdateProductsBulk(
-        newValues,
+        updatedSelection,
         token ?? undefined
       );
+  
       if (response.status === 200) {
         toast.success("Products updated successfully");
       }
-
+  
       return "response";
     } catch (err) {
       toast.error((err as Error).message);
