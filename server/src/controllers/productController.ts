@@ -212,6 +212,50 @@ export const updateProduct = async (
   }
 };
 
+export const bulkUpdateProducts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    
+    const { products } = req.body;
+
+   
+    if (!Array.isArray(products) || products.length === 0) {
+      return next(createError("No products to update", 400));
+    }
+
+    const ids = products.map((p: { id: string }) => p.id);
+    const updates = {} as Partial<{ msc: boolean; price: number }>;
+
+    if (products.some((p: { id: string }) => validUUID(p.id) === false)) {
+      return next(createError("Invalid product ID", 400));
+    }
+    
+    if ("msc" in products[0]) updates.msc = products[0].msc;
+    if ("price" in products[0]) updates.price = products[0].price;
+
+    if (Object.keys(updates).length === 0) {
+      return next(createError("No update fields provided", 400));
+    }
+
+    await prisma.product.updateMany({
+      where: {
+        id: { in: ids },
+        userId: req.user!.id, 
+      },
+      data: updates,
+    });
+
+    res.status(200).json({ message: "Bulk update successful" });
+  } catch (err) {
+    console.error(err);
+    return next(createError("Failed to process bulk update", 500));
+  }
+};
+
+
 // Delete
 export const deleteProduct = async (
   req: Request,
