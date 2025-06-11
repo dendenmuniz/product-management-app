@@ -345,16 +345,27 @@ export const Table = ({
             ))}
           </thead>
           <tbody>
-            {myTable.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="hover">
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="text-center text-sm">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
+                      {myTable.getRowModel().rows.map((row) => (
+                        <tr key={row.id} className="hover">
+                          {row.getVisibleCells().map((cell) => (
+                            cell.id === "name" ? (
+                              <td key={cell.id} className="text-center text-sm">
+                                <Link
+                                  to={`/products/${row.original.id}`}
+                                  className="link link-accent"
+                                >
+                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </Link>
+                              </td>
+                            ) :  (
+                              <td key={cell.id} className="text-sm">
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </td>
+                            )
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
         </table>
      
       </div>

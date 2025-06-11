@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 
 export const ProductsPage = () => {
   const { products, setProducts } = useProductsContext();
-  const { handleUpdateProducts, handleUpdateBulkProducts, loadProducts } = useProducts();
+  const { handleUpdateProduct, handleUpdateBulkProducts, loadProducts } = useProducts();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [bulkUpdateSuccess, setBulkUpdateSuccess] = useState<boolean>(false);
   const { token } = useAuthContext();
@@ -35,7 +35,7 @@ export const ProductsPage = () => {
   const handleSave = async (rowId: string) => {
     const productIndex = Number(rowId);
     const productToUpdate = products[productIndex];
-    await handleUpdateProducts(productToUpdate);
+    await handleUpdateProduct(productToUpdate);
   };
 
   const handleUpdateBulk = async (
