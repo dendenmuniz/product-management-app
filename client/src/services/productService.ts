@@ -19,8 +19,13 @@ export const httpUploadProducts = async (
   return res.data;
 };
 
-export const httpUpdateProducts = async (product: Product, token?: string) => {
+export const httpUpdateProduct = async (product: Product, token?: string) => {
   const res = await axios.put(`/api/products/${product.id}`, product, getAuthHeader(token));
+  return res.data;
+};
+
+export const httpCreateProduct = async (product: Product, token?: string) => {
+  const res = await axios.post(`/api/products`, product, getAuthHeader(token));
   return res.data;
 };
 

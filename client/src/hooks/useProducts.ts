@@ -3,8 +3,9 @@ import { BulkProductUpdate, Product } from "../@types/types";
 import {
   httpGetProducts,
   httpUploadProducts,
-  httpUpdateProducts,
+  httpUpdateProduct,
   httpUpdateProductsBulk,
+  httpCreateProduct,
 } from "../services/productService";
 import { useProductsContext } from "../context/ProductsContext";
 import { useAuthContext } from "../context/AuthContext";
@@ -37,10 +38,21 @@ export const useProducts = () => {
     }
   };
 
-  const handleUpdateProducts = async (product: Product) => {
+  const handleCreateProduct = async (product: Product) => {
     try {
-      await httpUpdateProducts(product, token ?? undefined);
-      toast.success("Product(s) updated successfully");
+      await httpCreateProduct(product, token ?? undefined);
+      toast.success("Product created successfully");
+      loadProducts(); // Adiciona na tabela
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+  };
+
+  const handleUpdateProduct = async (product: Product) => {
+    console.log("Updating product:", product);
+    try {
+      await httpUpdateProduct(product, token ?? undefined);
+      toast.success("Product updated successfully");
       // Reload products after update
       loadProducts();
     } catch (err) {
@@ -58,7 +70,7 @@ export const useProducts = () => {
         ...updates,
       }));
   
-      // Atualiza localmente (se quiser feedback visual instantâneo)
+      // Update Localy for faster feedback
       const newValues = products.map((product: Product) => {
         if (selectedRows.includes(product.id)) {
           return { ...product, ...updates };
@@ -85,7 +97,8 @@ export const useProducts = () => {
   return {
     loadProducts,
     submitFileParsed,
-    handleUpdateProducts,
+    handleCreateProduct,
+    handleUpdateProduct,
     handleUpdateBulkProducts,
   };
 };
