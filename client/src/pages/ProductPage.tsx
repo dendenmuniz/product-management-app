@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Product } from "../@types/types";
 import { toast } from "react-toastify";
 import { useProducts } from "../hooks/useProducts";
+import { ItemAttributeArray } from "../components/ItemAttributeArray";
 
 export const ProductPage = () => {
   const { handleUpdateProduct, handleCreateProduct } = useProducts();
@@ -16,9 +17,9 @@ export const ProductPage = () => {
   const { products } = useProductsContext();
 
   const product = products.find((p) => p.id === id);
-  const isLoading = !product;
-  const [isEditing, setIsEditing] = useState(false); // !product;
   const [formData, setFormData] = useState<Product | null>(product ?? null);
+  const isLoading = !formData;
+  const [isEditing, setIsEditing] = useState(false); // !product;
 
   useEffect(() => {
     if (!product) {
@@ -41,7 +42,7 @@ export const ProductPage = () => {
         imageUrl: "",
         variantCreated: "",
         variantUpdated: "",
-        inventoryLevelCreated: "",
+        inventoryLevelCreated: "", //merchantId, supplierModelNumber, ean
         inventoryLevelUpdated: "",
         createdAt: "",
         updatedAt: "",
@@ -52,9 +53,32 @@ export const ProductPage = () => {
     }
   }, [product]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
+  const handleChange = (
+    eOrName: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | string,
+    newValue?: string[] | string
+  ) => {
+    if (typeof eOrName === "string") {
+      if (newValue === undefined) {
+        return;
+      }
+      setFormData((prev) => (prev ? { ...prev, [eOrName]: newValue } : null));
+      return;
+    } else {
+      const { name, value } = eOrName.target;
+
+      const parsedValue =
+        name === "stock"
+          ? Number(value)
+          : name === "msc"
+            ? value === "true"
+            : value;
+
+      setFormData((prev) => (prev ? { ...prev, [name]: parsedValue } : null));
+    }
+  };
+
+  const handleArrayChange = (name: string, newValues: string[]) => {
+    setFormData((prev) => (prev ? { ...prev, [name]: newValues } : null));
   };
 
   const handleSave = async () => {
@@ -63,10 +87,8 @@ export const ProductPage = () => {
     try {
       if (formData.id) {
         await handleUpdateProduct(formData);
-        toast.success("Product updated successfully");
       } else {
         await handleCreateProduct(formData);
-        toast.success("Product created successfully");
       }
       setIsEditing(false);
       navigate(-1); // Go back after saving
@@ -83,38 +105,41 @@ export const ProductPage = () => {
           <div className="mb-6 flex justify-start">
             <button
               onClick={() => navigate(-1)}
-              className="btn btn-sm btn-outline"
+              className="btn btn-sm btn-primary"
             >
               ← Back
             </button>
             <div className="flex ml-auto items-right ml-4">
-            {isEditing ? (
-              <>
+              {isEditing ? (
+                <>
+                  <button
+                    className="btn btn-sm btn-primary ml-2"
+                    onClick={() => {
+                      if (!product) {
+                        navigate(-1); // If new and cancel, go back
+                      } else {
+                        setFormData(product); // Revert to original
+                        setIsEditing(false);
+                      }
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-sm btn-primary ml-2"
+                    onClick={handleSave}
+                  >
+                    Save
+                  </button>
+                </>
+              ) : (
                 <button
-                  className="btn btn-sm btn-outline ml-2"
-                  onClick={() => {
-                    if (!product) {
-                      navigate(-1); // If new and cancel, go back
-                    } else {
-                      setFormData(product); // Revert to original
-                      setIsEditing(false);
-                    }
-                  }}
+                  className="btn btn-sm btn-primary ml-2"
+                  onClick={() => setIsEditing(true)}
                 >
-                  Cancel
+                  Edit
                 </button>
-                <button className="btn btn-sm btn-outline ml-2" onClick={handleSave}>
-                  Save
-                </button>
-              </>
-            ) : (
-              <button
-                className="btn btn-sm btn-outline ml-2"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit
-              </button>
-            )}
+              )}
             </div>
           </div>
           <h3 className="text-2xl font-semibold mb-6 text-center">
@@ -122,38 +147,42 @@ export const ProductPage = () => {
           </h3>
 
           {isLoading || !formData ? (
-            <div className="animate-pulse space-y-4">
-              <div className="h-48 bg-base-300 rounded-lg" />
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="h-6 bg-base-300 rounded w-full" />
-                ))}
-              </div>
-              <div className="h-24 bg-base-300 rounded mt-6" />
+            <div className="animate-pulse space-y-4 text-center">
+              <span className="loading loading-dots loading-xl"></span>
             </div>
           ) : (
             <div className="md:flex items-start justify-center gap-8">
               <ItemImage
-                alt={product.name}
+                alt={formData?.name}
                 url={
-                  product.imageUrl ||
-                  "https://unsplash.com/photos/blue-and-black-nike-high-top-sneakers-BWPqHZBhMVA"
+                  formData?.imageUrl ||
+                  "https://raw.githubusercontent.com/dendenmuniz/assets/main/image_placeholder.png"
                 }
               />
 
               <div className="flex-1 mt-6  md:mt-0">
                 <ItemHeader
-                  itemManufector={
-                    <div className="tooltip tooltip-top" data-tip="Merchant ID">
-                      <span className="text-sm font-medium text-gray-700">
-                        {product.merchantId}
-                      </span>
-                    </div>
-                  }
-                  itemName={product.name}
-                />
+  itemManufector={
+    isEditing ? (
+      <ItemAttribute
+        attribute="Merchant"
+        attributeValue={formData?.merchantId || ""}
+        name="merchantId"
+        isEditing={isEditing}
+        onChange={handleChange}
+      />
+    ) : (
+      <div className="tooltip tooltip-top" data-tip="Merchant ID">
+        <span className="text-sm font-medium text-gray-700">
+          {formData.merchantId}
+        </span>
+      </div>
+    )
+  }
+  itemName={formData.name}
+/>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+                <div className="grid grid-flow-row-dense grid-cols-5 md:grid-cols-2 gap-1">
                   <ItemAttribute
                     attribute={
                       <span
@@ -207,55 +236,71 @@ export const ProductPage = () => {
                       </span>
                     }
                     attributeValue={
-                      <div
-                        className={`badge ${formData?.msc ? "badge-success" : "badge-ghost"}`}
-                      >
-                        {formData?.msc ? "Yes" : "No"}
-                      </div>
+                      isEditing ? (
+                        String(formData?.msc)
+                      ) : (
+                        <div
+                          className={`badge ${formData?.msc ? "badge-success" : "badge-ghost"}`}
+                        >
+                          {formData?.msc ? "Yes" : "No"}
+                        </div>
+                      )
                     }
                     name="msc"
                     isEditing={isEditing}
                     onChange={handleChange}
                   />
                   <ItemAttribute
-                    attribute="Type"
-                    attributeValue={formData?.productType}
-                    name="productType"
+                    attribute="Variant ID"
+                    attributeValue={formData?.variantId || ""}
+                    name="variantId"
                     isEditing={isEditing}
                     onChange={handleChange}
                   />
-                  <ItemAttribute
-                    attribute={
-                      <span
-                        className="tooltip tooltip-top"
-                        data-tip="Internal grouping of products"
-                      >
-                        Group
-                      </span>
-                    }
-                    attributeValue={formData?.productGroup}
-                    name="productGroup"
-                    isEditing={isEditing}
-                    onChange={handleChange}
-                  />
-                  <ItemAttribute
-                    attribute={
-                      <span
-                        className="tooltip tooltip-top"
-                        data-tip="Product department code"
-                      >
-                        Department
-                      </span>
-                    }
-                    attributeValue={formData?.department}
-                    name="department"
-                    isEditing={isEditing}
-                    onChange={handleChange}
-                  />
+                  <div className="col-span-2">
+                    <ItemAttributeArray
+                      attribute="EAN"
+                      name="ean"
+                      values={formData.ean}
+                      isEditing={isEditing}
+                      onChange={handleArrayChange}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <ItemAttributeArray
+                      attribute="Type"
+                      name="productType"
+                      values={formData.productType}
+                      isEditing={isEditing}
+                      onChange={handleArrayChange}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <ItemAttributeArray
+                      attribute="Group"
+                      name="productGroup"
+                      values={formData.productGroup}
+                      isEditing={isEditing}
+                      onChange={handleArrayChange}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <ItemAttributeArray
+                      attribute="Department"
+                      name="department"
+                      values={formData.department}
+                      isEditing={isEditing}
+                      onChange={handleArrayChange}
+                    />
+                  </div>
                 </div>
 
                 <div className="mt-6">
-                  <ItemDescription description={formData?.description || ""} />
+                  <ItemDescription
+                    description={formData.description ?? ""}
+                    isEditing={isEditing}
+                    onChange={handleChange}
+                  />
                 </div>
               </div>
             </div>

@@ -1,6 +1,16 @@
 import { useState } from "react";
 
-export const ItemDescription = ({ description }: { description: string }) => {
+interface ItemDescriptionProps {
+  description: string;
+  isEditing?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+}
+
+export const ItemDescription = ({
+  description,
+  isEditing = false,
+  onChange,
+}: ItemDescriptionProps) => {
   const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
 
   function cleanProductDescription(html: string): string {
@@ -43,15 +53,26 @@ export const ItemDescription = ({ description }: { description: string }) => {
       <h2 className="text-lg font-semibold mb-2 text-base-content">
         Description
       </h2>
-      <div className="prose max-w-none whitespace-pre-wrap text-sm text-base-content/80 mb-4">
-        {displayDescription}
-      </div>
-      <button
-        className="btn btn-sm btn-link text-primary"
-        onClick={() => setShowFullDescription((prev) => !prev)}
-      >
-        {showFullDescription ? "Show less" : "Show more"}
-      </button>
+      {isEditing ? (
+        <textarea
+          name="description"
+          className="textarea textarea-bordered w-full h-40 text-sm"
+          value={description}
+          onChange={onChange}
+        />
+      ) : (
+        <>
+          <div className="prose max-w-none whitespace-pre-wrap text-sm text-base-content/80 mb-4">
+            {displayDescription}
+          </div>
+          <button
+            className="btn btn-sm btn-link text-primary"
+            onClick={() => setShowFullDescription((prev) => !prev)}
+          >
+            {showFullDescription ? "Show less" : "Show more"}
+          </button>
+        </>
+      )}
     </div>
   );
 };
