@@ -92,7 +92,7 @@ export const BulkUpdateForm = ({
           <div className="form-control">
             <button
               type="button"
-              className="btn btn-primary"
+              className="btn btn-sm btn-primary"
               disabled={!allowUpdate || loading}
               onClick={handleSubmit}
             >

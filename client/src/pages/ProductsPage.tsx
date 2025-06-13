@@ -48,7 +48,7 @@ export const ProductsPage = () => {
   };
 
   return (
-    <section className="min-h-screen  bg-base-200 py-10 px-4">
+    <section className="min-h-screen bg-base-200 py-10 px-2">
 
       <div className="w-full px-4 lg:px-8 xl:px-16 mx-auto">
         <h3 className="text-xl font-semibold text-base-content mb-6 px-2">
@@ -59,7 +59,7 @@ export const ProductsPage = () => {
           <div className="card-body ">
             <div className="flex justify-between items-start flex-wrap gap-4">
               <FileUploader />
-              <Link to="/products/new" className="btn btn-primary self-start">+ Add Product</Link>
+              <Link to="/products/new" className="btn btn-sm btn-primary self-start">+ Add Product</Link>
             </div>
 
             {selectedRows.length > 0 && (

@@ -137,14 +137,14 @@ export const Table = ({
           editableRow === row.id ? (
             <button
               onClick={() => handleSave(row.id)}
-              className="btn btn-sm btn-success"
+              className="btn btn-xs btn-success"
             >
               Save
             </button>
           ) : (
             <button
               onClick={() => handleEdit(row.id)}
-              className="btn btn-sm btn-primary"
+              className="btn btn-xs btn-primary"
             >
               Edit
             </button>

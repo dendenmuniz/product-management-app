@@ -16,7 +16,7 @@ export const Filter = ({ column }: { column: Column<any, unknown> }) => {
           column.setFilterValue((old: [number, number]) => [value, old?.[1]])
         }
         placeholder="Min"
-        className="input input-sm input-bordered w-24"
+        className="input input-sm input-bordered w-20"
       />
       <DebouncedInput
         type="number"
@@ -25,7 +25,7 @@ export const Filter = ({ column }: { column: Column<any, unknown> }) => {
           column.setFilterValue((old: [number, number]) => [old?.[0], value])
         }
         placeholder="Max"
-        className="input input-sm input-bordered w-24"
+        className="input input-sm input-bordered w-20"
       />
     </div>
   ) : filterVariant === "select" ? (

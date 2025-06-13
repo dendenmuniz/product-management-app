@@ -3,7 +3,7 @@ export const ItemHeader = ({
   itemName,
 }: {
   itemManufector:  React.ReactNode;
-  itemName: string;
+  itemName: React.ReactNode;
 }) => {
   return (
     <div className="border-b border-base-300 pb-6 mb-4">

@@ -19,7 +19,7 @@ export const ProductPage = () => {
   const product = products.find((p) => p.id === id);
   const [formData, setFormData] = useState<Product | null>(product ?? null);
   const isLoading = !formData;
-  const [isEditing, setIsEditing] = useState(false); // !product;
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!product) {
@@ -42,7 +42,7 @@ export const ProductPage = () => {
         imageUrl: "",
         variantCreated: "",
         variantUpdated: "",
-        inventoryLevelCreated: "", //merchantId, supplierModelNumber, ean
+        inventoryLevelCreated: "",
         inventoryLevelUpdated: "",
         createdAt: "",
         updatedAt: "",
@@ -162,25 +162,40 @@ export const ProductPage = () => {
 
               <div className="flex-1 mt-6  md:mt-0">
                 <ItemHeader
-  itemManufector={
-    isEditing ? (
-      <ItemAttribute
-        attribute="Merchant"
-        attributeValue={formData?.merchantId || ""}
-        name="merchantId"
-        isEditing={isEditing}
-        onChange={handleChange}
-      />
-    ) : (
-      <div className="tooltip tooltip-top" data-tip="Merchant ID">
-        <span className="text-sm font-medium text-gray-700">
-          {formData.merchantId}
-        </span>
-      </div>
-    )
-  }
-  itemName={formData.name}
-/>
+                  itemManufector={
+                    isEditing ? (
+                      <ItemAttribute
+                        attribute="Merchant"
+                        attributeValue={formData?.merchantId || ""}
+                        name="merchantId"
+                        isEditing={isEditing}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      <div
+                        className="tooltip tooltip-top"
+                        data-tip="Merchant ID"
+                      >
+                        <span className="text-sm font-medium text-gray-700">
+                          {formData.merchantId}
+                        </span>
+                      </div>
+                    )
+                  }
+                  itemName={
+                    isEditing ? (
+                      <ItemAttribute
+                        attribute="Product Name"
+                        attributeValue={formData?.name || ""}
+                        name="name"
+                        isEditing={isEditing}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      formData.name
+                    )
+                  }
+                />
 
                 <div className="grid grid-flow-row-dense grid-cols-5 md:grid-cols-2 gap-1">
                   <ItemAttribute
@@ -250,6 +265,7 @@ export const ProductPage = () => {
                     isEditing={isEditing}
                     onChange={handleChange}
                   />
+                  <div className="col-span-2">
                   <ItemAttribute
                     attribute="Variant ID"
                     attributeValue={formData?.variantId || ""}
@@ -257,6 +273,7 @@ export const ProductPage = () => {
                     isEditing={isEditing}
                     onChange={handleChange}
                   />
+                  </div>
                   <div className="col-span-2">
                     <ItemAttributeArray
                       attribute="EAN"

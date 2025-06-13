@@ -79,10 +79,10 @@ export const FileUploader = () => {
             name="file"
             accept=".json"
             onChange={handleFileChange}
-            className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+            className="file-input file-input-sm file-input-bordered file-input-primary w-full max-w-xs"
           />
 
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn btn-sm btn-primary">
             {loading && <span className="loading loading-spinner loading-sm mr-2" />}
             Upload
           </button>
