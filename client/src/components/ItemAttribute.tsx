@@ -6,21 +6,20 @@ export const ItemAttribute = ({
   name,
   isEditing = false,
   onChange,
+  errorMessage,
 }: {
   attribute: React.ReactNode;
   attributeValue: string | null | (string | null)[] | React.ReactNode;
   name?: string;
   isEditing?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  errorMessage?: string;
 }) => {
-
-
   // Handle non-editable mode
   const renderContent = () => {
     if (React.isValidElement(attributeValue)) {
       return attributeValue;
     }
-
 
     if (attributeValue !== null && attributeValue !== "") {
       return <span className="text-sm">{String(attributeValue)}</span>;
@@ -42,6 +41,9 @@ export const ItemAttribute = ({
               value={attributeValue !== null ? String(attributeValue) : ""}
               onChange={onChange}
             />
+            {errorMessage && (
+              <p className="alert alert-error alert-soft text-sm text-error mt-1">{errorMessage}</p>
+            )}
           </fieldset>
         ) : (
           <>

@@ -1,4 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { productSchema } from "../validation/productSchema";
+import { ZodError } from "zod";
 import { useProductsContext } from "../context/ProductsContext";
 import { ItemImage } from "../components/ItemImage";
 import { ItemHeader } from "../components/ItemHeader";
@@ -9,6 +11,12 @@ import { Product } from "../@types/types";
 import { toast } from "react-toastify";
 import { useProducts } from "../hooks/useProducts";
 import { ItemAttributeArray } from "../components/ItemAttributeArray";
+import { ItemBoolean } from "../components/ItemBoolean";
+import {
+  fieldParsers,
+  cleanFormData,
+  applyImageFallback,
+} from "../utils/product";
 
 export const ProductPage = () => {
   const { handleUpdateProduct, handleCreateProduct } = useProducts();
@@ -20,6 +28,7 @@ export const ProductPage = () => {
   const [formData, setFormData] = useState<Product | null>(product ?? null);
   const isLoading = !formData;
   const [isEditing, setIsEditing] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!product) {
@@ -53,48 +62,103 @@ export const ProductPage = () => {
     }
   }, [product]);
 
+  const handleArrayChange = (name: string, newValues: string[]) => {
+    setFormData((prev) => (prev ? { ...prev, [name]: newValues } : null));
+
+    // Remove the error for this field if it exists
+    setFormErrors((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [name]: _removed, ...rest } = prev;
+      return rest;
+    });
+  };
+
   const handleChange = (
     eOrName: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | string,
     newValue?: string[] | string
   ) => {
     if (typeof eOrName === "string") {
-      if (newValue === undefined) {
-        return;
-      }
-      setFormData((prev) => (prev ? { ...prev, [eOrName]: newValue } : null));
-      return;
+      if (newValue === undefined || !formData) return;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parsedFormData = {
+        ...formData,
+        stock: fieldParsers.stock(formData.stock),
+        msc: fieldParsers.msc(formData.msc),
+        imageUrl: applyImageFallback(formData.imageUrl),
+      };
+
+      setFormData((prev) =>
+        prev ? { ...prev, [eOrName]: parsedFormData } : null
+      );
+
+      setFormErrors((prev) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [eOrName]: _removed, ...rest } = prev;
+        return rest;
+      });
     } else {
       const { name, value } = eOrName.target;
 
-      const parsedValue =
-        name === "stock"
-          ? Number(value)
-          : name === "msc"
-            ? value === "true"
-            : value;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parser = fieldParsers[name] || ((v: any) => v);
+      const parsed = parser(value);
 
-      setFormData((prev) => (prev ? { ...prev, [name]: parsedValue } : null));
+      setFormData((prev) => (prev ? { ...prev, [name]: parsed } : null));
+
+      setFormErrors((prev) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [name]: _removed, ...rest } = prev;
+        return rest;
+      });
     }
-  };
-
-  const handleArrayChange = (name: string, newValues: string[]) => {
-    setFormData((prev) => (prev ? { ...prev, [name]: newValues } : null));
   };
 
   const handleSave = async () => {
     if (!formData) return;
 
     try {
+      const placeholderImage =
+        "https://raw.githubusercontent.com/dendenmuniz/assets/main/image_placeholder.png";
+
+      // parse and validate form data
+      const parsedFormData = {
+        ...formData,
+        stock: fieldParsers.stock(formData.stock),
+        msc: fieldParsers.msc(formData.msc),
+        imageUrl:
+          formData.imageUrl && formData.imageUrl.trim() !== ""
+            ? formData.imageUrl
+            : placeholderImage,
+      };
+
+      // Zod validation
+      productSchema.parse(parsedFormData);
+      setFormErrors({});
+
+      // clean up form data
+      // Remove empty strings, null, or undefined values
+      const cleanedData = cleanFormData(parsedFormData);
+
       if (formData.id) {
-        await handleUpdateProduct(formData);
+        await handleUpdateProduct(cleanedData as Product);
       } else {
-        await handleCreateProduct(formData);
+        await handleCreateProduct(cleanedData as Product);
       }
+
       setIsEditing(false);
-      navigate(-1); // Go back after saving
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error("Something went wrong while saving the product");
+      if (error instanceof ZodError) {
+        const errorMap: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          const field = err.path[0] as string;
+          errorMap[field] = err.message;
+        });
+        setFormErrors(errorMap);
+        toast.error("Please fix the highlighted fields");
+      } else {
+        toast.error("Something went wrong while saving the product");
+      }
     }
   };
 
@@ -154,10 +218,9 @@ export const ProductPage = () => {
             <div className="md:flex items-start justify-center gap-8">
               <ItemImage
                 alt={formData?.name}
-                url={
-                  formData?.imageUrl ||
-                  "https://raw.githubusercontent.com/dendenmuniz/assets/main/image_placeholder.png"
-                }
+                url={formData?.imageUrl || ""}
+                isEditing={isEditing}
+                onChange={handleChange}
               />
 
               <div className="flex-1 mt-6  md:mt-0">
@@ -170,6 +233,7 @@ export const ProductPage = () => {
                         name="merchantId"
                         isEditing={isEditing}
                         onChange={handleChange}
+                        errorMessage={formErrors["merchantId"]}
                       />
                     ) : (
                       <div
@@ -190,6 +254,7 @@ export const ProductPage = () => {
                         name="name"
                         isEditing={isEditing}
                         onChange={handleChange}
+                        errorMessage={formErrors["name"]}
                       />
                     ) : (
                       formData.name
@@ -211,6 +276,7 @@ export const ProductPage = () => {
                     name="supplierModelNumber"
                     isEditing={isEditing}
                     onChange={handleChange}
+                    errorMessage={formErrors["supplierModelNumber"]}
                   />
                   <ItemAttribute
                     attribute="Size"
@@ -226,6 +292,7 @@ export const ProductPage = () => {
                     name="stock"
                     isEditing={isEditing}
                     onChange={handleChange}
+                    errorMessage={formErrors["stock"]}
                   />
                   <ItemAttribute
                     attribute="Vendor"
@@ -240,39 +307,23 @@ export const ProductPage = () => {
                     name="price"
                     isEditing={isEditing}
                     onChange={handleChange}
+                    errorMessage={formErrors["price"]}
                   />
-                  <ItemAttribute
-                    attribute={
-                      <span
-                        className="tooltip tooltip-top"
-                        data-tip="Multi-Sales Channel"
-                      >
-                        MSC
-                      </span>
-                    }
-                    attributeValue={
-                      isEditing ? (
-                        String(formData?.msc)
-                      ) : (
-                        <div
-                          className={`badge ${formData?.msc ? "badge-success" : "badge-ghost"}`}
-                        >
-                          {formData?.msc ? "Yes" : "No"}
-                        </div>
-                      )
-                    }
+                  <ItemBoolean
+                    attribute="MSC (Multi-Sales Channel)"
                     name="msc"
+                    value={formData.msc ?? false}
                     isEditing={isEditing}
                     onChange={handleChange}
                   />
                   <div className="col-span-2">
-                  <ItemAttribute
-                    attribute="Variant ID"
-                    attributeValue={formData?.variantId || ""}
-                    name="variantId"
-                    isEditing={isEditing}
-                    onChange={handleChange}
-                  />
+                    <ItemAttribute
+                      attribute="Variant ID"
+                      attributeValue={formData?.variantId || ""}
+                      name="variantId"
+                      isEditing={isEditing}
+                      onChange={handleChange}
+                    />
                   </div>
                   <div className="col-span-2">
                     <ItemAttributeArray
