@@ -1,50 +1,59 @@
+import React from "react";
+
 export const ItemAttribute = ({
   attribute,
   attributeValue,
+  name,
+  isEditing = false,
+  onChange,
+  errorMessage,
 }: {
-  attribute: string;
-  attributeValue: string | null | (string | null)[];
+  attribute: React.ReactNode;
+  attributeValue: string | null | (string | null)[] | React.ReactNode;
+  name?: string;
+  isEditing?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  errorMessage?: string;
 }) => {
-  // Function to split and filter sizes
-  function splitAndFilter(input: string): string[] {
-    const resultArray: string[] = input.split("/");
-    const filteredArray: string[] = resultArray.filter((item) => item !== "");
-    return filteredArray;
-  }
+  // Handle non-editable mode
+  const renderContent = () => {
+    if (React.isValidElement(attributeValue)) {
+      return attributeValue;
+    }
 
-  let filteredArray: string[] = [];
-  if (Array.isArray(attributeValue)) {
-    // If attributeList is an array, filter it directly
-    filteredArray = attributeValue.filter(
-      (item) => item !== null && item !== ""
-    ) as string[];
-  } else if (typeof attributeValue === "string") {
-    // If attributeList is a string, split and filter it
-    filteredArray = splitAndFilter(attributeValue);
-  }
+    if (attributeValue !== null && attributeValue !== "") {
+      return <span className="text-sm">{String(attributeValue)}</span>;
+    }
 
-  if (filteredArray.length === 0 && typeof attributeValue === "string") {
-    filteredArray = [attributeValue]; // Treat the single string as an array
-  }
+    return <span className="text-sm text-gray-300">N/A</span>;
+  };
 
   return (
-    <>
-      <div className="py-2 border-b border-gray-200 flex items-center justify-between">
-        <p className="text-base leading-4 text-gray-800 ">{attribute}</p>
-        <div className="flex items-center justify-center">
-          {filteredArray.length > 0 ? (
-            filteredArray.map((size, index) => (
-              <p
-                key={index}
-                className="text-sm leading-none text-gray-600 mr-3">
-                {size}
-              </p>
-            ))
-          ) : (
-            <p className="text-sm leading-none text-gray-600">N/A</p>
-          )}
-        </div>
+    <div className="pb-2 border-b border-base-300 flex items-start justify-between">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {isEditing ? (
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">{attribute}</legend>
+            <input
+              type="text"
+              className="input input-sm input-bordered w-full max-w-xs"
+              name={name}
+              value={attributeValue !== null ? String(attributeValue) : ""}
+              onChange={onChange}
+            />
+            {errorMessage && (
+              <p className="alert alert-error alert-soft text-sm text-error mt-1">{errorMessage}</p>
+            )}
+          </fieldset>
+        ) : (
+          <>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">{attribute}</legend>
+              {renderContent()}
+            </fieldset>
+          </>
+        )}
       </div>
-    </>
+    </div>
   );
 };

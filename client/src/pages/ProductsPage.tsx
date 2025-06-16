@@ -1,26 +1,30 @@
-import { useState } from "react";
-import { Header } from "../components/Header";
+import { useState, useEffect  } from "react";
 import { Table } from "../components/Table";
 import { FileUploader } from "../components/FileUploader";
-import { Card } from "../components/Card";
 import { BulkUpdateForm } from "../components/BulkUpdateForm";
 import { useProductsContext } from "../context/ProductsContext";
 import { Product } from "../@types/types";
 import { useProducts } from "../hooks/useProducts";
+import { useAuthContext } from "../context/AuthContext";
+import { Link } from "react-router-dom";
+
 
 export const ProductsPage = () => {
   const { products, setProducts } = useProductsContext();
-  const { handleUpdateProducts, handleUpdateBulkProducts } = useProducts();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const { handleUpdateProduct, handleUpdateBulkProducts, loadProducts } = useProducts();
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [bulkUpdateSuccess, setBulkUpdateSuccess] = useState<boolean>(false);
+  const { token } = useAuthContext();
 
-  const handleChange = (
-    rowId: string,
-    columnId: keyof Product,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any
-  ) => {
+
+  useEffect(() => {
+    if (token) {
+      loadProducts();
+    }
+  }, [token]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleChange = (rowId: string, columnId: keyof Product, value: any) => {
     setProducts((prev) =>
       prev.map((product, index) =>
         index.toString() === rowId ? { ...product, [columnId]: value } : product
@@ -31,49 +35,50 @@ export const ProductsPage = () => {
   const handleSave = async (rowId: string) => {
     const productIndex = Number(rowId);
     const productToUpdate = products[productIndex];
-    await handleUpdateProducts(productToUpdate);
+    await handleUpdateProduct(productToUpdate);
   };
 
   const handleUpdateBulk = async (
-    updates: Partial<Pick<Product, "MSC" | "price">>
+    updates: Partial<Pick<Product, "msc" | "price">>
   ) => {
-    console.log(updates);
     const response = await handleUpdateBulkProducts(updates, selectedRows);
     if (response) {
       setBulkUpdateSuccess(true);
     }
   };
+
   return (
-    <section className="bg-violet-50">
-      <Header sectionName="Products Management" />
-      <div className="container m-auto py-20">
-        <div className="bg-white p-4  rounded-lg shadow-md rounded-md border m-4 md:m-0">
-          <Card>
-            <FileUploader />
-          </Card>
-        </div>
-        <div className="container m-auto py-12">
-          <div className="gap-4 bg-white m-4 rounded-lg shadow-md rounded-md border m-4 md:m-0">
-            <Card classN="p-6 rounded-lg shadow-md m-6">
-              <h1 className="block text-gray-800 font-semibold mb-6">
-                Bulk update
-              </h1>
+    <section className="min-h-screen bg-base-200 py-10 px-2">
+
+      <div className="w-full px-4 lg:px-8 xl:px-16 mx-auto">
+        <h3 className="text-xl font-semibold text-base-content mb-6 px-2">
+          Products
+        </h3>
+
+        <div className="card card-bordered  shadow-sm bg-base-100 w-full max-w-screen-2xl mx-auto">
+          <div className="card-body ">
+            <div className="flex justify-between items-start flex-wrap gap-4">
+              <FileUploader />
+              <Link to="/products/new" className="btn btn-sm btn-primary self-start">+ Add Product</Link>
+            </div>
+
+            {selectedRows.length > 0 && (
               <BulkUpdateForm
                 selectedRows={selectedRows}
                 onSubmit={handleUpdateBulk}
               />
-            </Card>
+            )}
 
-            <div className="bg-white gap-4 px-6 py-4 mb-4 m-4 md:m-0 text-gray-800">
-              <Card>
-                <Table
-                  products={products}
-                  onChange={handleChange}
-                  setSelectedRows={setSelectedRows}
-                  onSave={handleSave}
-                  clearSelection={bulkUpdateSuccess}
-                />
-              </Card>
+            <div className="w-full overflow-auto border border-base-300 rounded-lg">
+           
+              <Table
+                products={products}
+                onChange={handleChange}
+                setSelectedRows={setSelectedRows}
+                onSave={handleSave}
+                clearSelection={bulkUpdateSuccess}
+              />
+           
             </div>
           </div>
         </div>

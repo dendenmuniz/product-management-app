@@ -1,8 +1,17 @@
 import { useState } from "react";
 
-export const ItemDescription = ({ description }: { description: string }) => {
-  const [showFullDescription, setShowFullDescription] =
-    useState<boolean>(false);
+interface ItemDescriptionProps {
+  description: string;
+  isEditing?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+}
+
+export const ItemDescription = ({
+  description,
+  isEditing = false,
+  onChange,
+}: ItemDescriptionProps) => {
+  const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
 
   function cleanProductDescription(html: string): string {
     const parser = new DOMParser();
@@ -17,20 +26,16 @@ export const ItemDescription = ({ description }: { description: string }) => {
       rows.forEach((row) => {
         const cells = row.querySelectorAll("td");
         if (cells.length >= 2) {
-          // Ensure there are at least two cells
           const label = cells[0]?.textContent?.trim() || "";
           const value = cells[1]?.textContent?.trim() || "";
           formattedLines.push(`${label} ${value}`);
         }
       });
-    } else {
-      console.warn("No specifications table found.");
     }
 
     const specificationsText = formattedLines.join("\n");
-    // Check if "Specifications" is in the textContent
+
     if (textContent.includes("Specifications")) {
-      // Remove "Specifications" from textContent
       textContent = textContent.replace(/Specifications[\s\S]*/i, "").trim();
     }
 
@@ -41,27 +46,33 @@ export const ItemDescription = ({ description }: { description: string }) => {
 
   const displayDescription = showFullDescription
     ? descriptionText
-    : descriptionText.substring(0, 90) + "...";
+    : descriptionText.substring(0, 200) + "...";
 
-  if (!showFullDescription) {
-    description = description.substring(0, 90) + "...";
-  }
   return (
-    <div className="w-full py-2">
-      <p className="text-base leading-4 text-gray-800 ">Description</p>
-      <div className="text-base lg:leading-tight leading-normal text-gray-600 mt-7">
-        {displayDescription.split("\n").map((line, index) => (
-          <span key={index}>
-            {line}
-            <br />
-          </span>
-        ))}
-      </div>
-      <button
-        className="text-violet-400 mb-5 hover:text-violet-700"
-        onClick={() => setShowFullDescription((prevState) => !prevState)}>
-        {showFullDescription ? "Less" : "More"}
-      </button>
+    <div className="w-full mt-8">
+      <h2 className="text-lg font-semibold mb-2 text-base-content">
+        Description
+      </h2>
+      {isEditing ? (
+        <textarea
+          name="description"
+          className="textarea textarea-bordered w-full h-40 text-sm"
+          value={description}
+          onChange={onChange}
+        />
+      ) : (
+        <>
+          <div className="prose max-w-none whitespace-pre-wrap text-sm text-base-content/80 mb-4">
+            {displayDescription}
+          </div>
+          <button
+            className="btn btn-sm btn-link text-primary"
+            onClick={() => setShowFullDescription((prev) => !prev)}
+          >
+            {showFullDescription ? "Show less" : "Show more"}
+          </button>
+        </>
+      )}
     </div>
   );
 };
