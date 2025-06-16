@@ -142,7 +142,11 @@ export const getAllProducts = async (
   next: NextFunction
 ) => {
   try {
-    const products = await prisma.product.findMany();
+    const products = await prisma.product.findMany({
+  orderBy: {
+    createdAt: "desc",
+  },
+});
     res.status(200).json(products);
     return;
   } catch (error) {
