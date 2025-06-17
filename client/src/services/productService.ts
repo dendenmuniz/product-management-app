@@ -1,36 +1,32 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import axios from "axios";
+import api from "./api";
 import { BulkProductUpdate, Product } from "../@types/types";
 
-const getAuthHeader = (token?: string) => ({
-  headers: { Authorization: `Bearer ${token}` },
-  });
-
-export const httpGetProducts = async (token?: string) => {
-  const res = await axios.get("/api/products/", getAuthHeader(token));
+export const httpGetProducts = async () => {
+  const res = await api.get("/products/");
   return res.data;
 };
 
-export const httpUploadProducts = async (
-  data: { products: Product[]; fileName: string; uploadDate: string },
-  token?: string
-) => {
-  const res = await axios.post("/api/products/import", data, getAuthHeader(token));
+export const httpUploadProducts = async (data: {
+  products: Product[];
+  fileName: string;
+  uploadDate: string;
+}) => {
+  const res = await api.post("/products/import", data);
   return res.data;
 };
 
-export const httpUpdateProduct = async (product: Product, token?: string) => {
-  const res = await axios.put(`/api/products/${product.id}`, product, getAuthHeader(token));
+export const httpUpdateProduct = async (product: Product) => {
+  const res = await api.put(`/products/${product.id}`, product);
   return res.data;
 };
 
-export const httpCreateProduct = async (product: Product, token?: string) => {
-  const res = await axios.post(`/api/products`, product, getAuthHeader(token));
+export const httpCreateProduct = async (product: Product) => {
+  const res = await api.post(`/products`, product);
   return res.data;
 };
 
-export const httpUpdateProductsBulk = async (products: BulkProductUpdate[], token?: string) => {
+export const httpUpdateProductsBulk = async (products: BulkProductUpdate[]) => {
   console.log("products no http", products);
-  const res = await axios.put("/api/products/bulk-update", { products }, getAuthHeader(token));
+  const res = await api.put("/products/bulk-update", { products });
   return res;
 };

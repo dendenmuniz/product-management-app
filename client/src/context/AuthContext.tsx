@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../@types/types";
-import { isTokenExpired } from "../utils/auth";
+import { setupInterceptors, reset401Handler } from "../services/api";
 
 interface AuthContextType {
   user: User | null;
@@ -22,6 +22,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setToken(token);
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
+    reset401Handler(); // Reset the 401 handler to avoid duplicate logout calls
+    setupInterceptors(() => localStorage.getItem("token"), logout);
   };
 
   const logout = () => {
@@ -34,15 +36,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
+
     if (storedToken && storedUser) {
-      if (!isTokenExpired(storedToken)) {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-      } else {
-        logout();
-      }
+      setToken(storedToken);
+      setUser(JSON.parse(storedUser));
+      setupInterceptors(() => storedToken, logout);
     }
   }, []);
+
+  useEffect(() => {
+    if (token) {
+      setupInterceptors(() => token, logout);
+    }
+  }, [token]);
 
   return (
     <AuthContext.Provider

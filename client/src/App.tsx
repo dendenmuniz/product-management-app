@@ -11,11 +11,7 @@ import { ProductsPage } from "./pages/ProductsPage";
 import { AppProviders } from "./context/AppProviders";
 import { LoginPage } from "./pages/LoginPage";
 
-
-
 const App = () => {
-
-
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<MainLayout children={undefined} />}>

@@ -8,18 +8,18 @@ import {
   httpCreateProduct,
 } from "../services/productService";
 import { useProductsContext } from "../context/ProductsContext";
-import { useAuthContext } from "../context/AuthContext";
+
 
 export const useProducts = () => {
   const { products, setProducts } = useProductsContext();
-  const { token } = useAuthContext();
+
 
   const loadProducts = async () => {
     try {
-      const data = await httpGetProducts(token ?? undefined);
+      const data = await httpGetProducts();
       setProducts(data);
     } catch (err) {
-      toast.error((err as Error).message);
+      console.error(err);
     }
   };
 
@@ -30,33 +30,33 @@ export const useProducts = () => {
   }) => {
     console.log(products);
     try {
-      const responseData = await httpUploadProducts(data, token ?? undefined);
+      const responseData = await httpUploadProducts(data);
       setProducts(responseData);
       toast.success("File uploaded successfully");
     } catch (err) {
-      toast.error((err as Error).message);
+      console.error(err);
     }
   };
 
   const handleCreateProduct = async (product: Product) => {
     try {
-      await httpCreateProduct(product, token ?? undefined);
+      await httpCreateProduct(product);
       toast.success("Product created successfully");
       loadProducts(); // Adiciona na tabela
     } catch (err) {
-      toast.error((err as Error).message);
+      console.error(err);
     }
   };
 
   const handleUpdateProduct = async (product: Product) => {
-    console.log("Updating product:", product);
+    console.log()
     try {
-      await httpUpdateProduct(product, token ?? undefined);
+      await httpUpdateProduct(product);
       toast.success("Product updated successfully");
       // Reload products after update
       loadProducts();
     } catch (err) {
-      toast.error((err as Error).message);
+      console.error(err);
     }
   };
 
@@ -80,8 +80,7 @@ export const useProducts = () => {
       setProducts(newValues);
   
       const response = await httpUpdateProductsBulk(
-        updatedSelection,
-        token ?? undefined
+        updatedSelection
       );
   
       if (response.status === 200) {
@@ -90,7 +89,7 @@ export const useProducts = () => {
   
       return "response";
     } catch (err) {
-      toast.error((err as Error).message);
+      console.error(err);
     }
   };
 
